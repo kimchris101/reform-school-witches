@@ -1,6 +1,6 @@
 from typing import Optional
 from uuid import uuid4
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, HTTPException, status, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -30,8 +30,8 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
         id=uuid4(),
         slug="kimbra-woods",
         full_name="Kimbra Woods",
-        alias="The Chalice",
-        patron_saint="The Blessed Virgin Mary",
+        alias="Mary / The Chalice",
+        patron_saint="Our Lady of Tears",
         sacramental_affinity="Consecrated Light & Unbroken Vessels",
         classification_class="Consecrated Vessel / Exception",
         biography="Targeted from birth by the Sanguine Coven due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she now channels raw holy illumination, serving as the flame around which the Academy's perimeter walls are built.",
@@ -108,7 +108,6 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_dossiers_page(request: Request):
-    """Renders the Character Dossier Hub grid."""
     return templates.TemplateResponse(
         request=request,
         name="pages/dossiers.html",
@@ -120,19 +119,18 @@ async def render_dossiers_page(request: Request):
     )
 
 @router.get("/easter-egg/cyprian", response_class=HTMLResponse)
-async def get_cyprian_dossier(request: Request, response: Response):
-    """Returns secret St. Cyprian fragment and launches the Library Awakening cutscene."""
-    response.headers["HX-Trigger-After-Swap"] = "launchCyprianCutscene"
-    
-    return templates.TemplateResponse(
+async def get_cyprian_dossier(request: Request):
+    """Returns the decrypted St. Cyprian file and triggers the video popup."""
+    resp = templates.TemplateResponse(
         request=request,
         name="components/cyprian_dossier.html",
         context={}
     )
+    resp.headers["HX-Trigger"] = "launchCyprianCutscene"
+    return resp
 
 @router.get("/{slug}", response_class=HTMLResponse)
 async def get_dossier_modal(request: Request, slug: str, reveal_spoiler: Optional[bool] = False):
-    """Returns the spoiler-safe modal HTML fragment for HTMX swapping."""
     character = CHARACTER_DB.get(slug)
     if not character:
         raise HTTPException(

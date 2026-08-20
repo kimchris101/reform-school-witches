@@ -110,6 +110,15 @@
             </p>
         </div>
     </footer>
+<!-- Global Cutscene Event Trigger Listeners -->
+<script>
+  document.body.addEventListener("launchCoLinkCutscene", function() {
+    htmx.ajax('GET', '/media/cutscene/sacramental-bond', { target: 'body', swap: 'beforeend' });
+  });
 
+  document.body.addEventListener("launchCyprianCutscene", function() {
+    htmx.ajax('GET', '/media/cutscene/library-awakening', { target: 'body', swap: 'beforeend' });
+  });
+</script>
 </body>
 </html>

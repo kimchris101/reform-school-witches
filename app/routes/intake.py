@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, HTTPException, status, Response
+from fastapi import APIRouter, Request, Form, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
@@ -11,7 +11,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def render_intake_page(request: Request):
-    """Renders the main Academy Intake Diagnostic Exam page."""
     return templates.TemplateResponse(
         request=request,
         name="pages/intake.html",
@@ -24,7 +23,6 @@ async def render_intake_page(request: Request):
 @router.post("/evaluate", response_class=HTMLResponse)
 async def evaluate_intake_submission(
     request: Request,
-    response: Response,
     user_email: str = Form(...),
     user_alias: str = Form(...),
     q1: str = Form(...),
@@ -33,7 +31,6 @@ async def evaluate_intake_submission(
     q4: str = Form(...),
     q5: str = Form(...)
 ):
-    """Processes intake choices via HTMX, calculates archetype, and returns the Diocesan Letter component."""
     try:
         answers = [
             QuizAnswer(question_id=1, selected_option=q1),
@@ -54,15 +51,9 @@ async def evaluate_intake_submission(
             detail=f"Invalid diagnostic submission: {err.errors()}"
         )
 
-    # Calculate result & generate letter payload
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
 
-    # Trigger Sacramental Bond cutscene automatically if the user scores as The Co-Link Partner
-    if result.archetype in (ArchetypeEnum.CO_LINK_PARTNER, "The Co-Link Partner"):
-        response.headers["HX-Trigger-After-Swap"] = "launchCoLinkCutscene"
-
-    # Return HTML fragment for HTMX swapping
-    return templates.TemplateResponse(
+    resp = templates.TemplateResponse(
         request=request,
         name="components/diocesan_letter.html",
         context={
@@ -70,3 +61,9 @@ async def evaluate_intake_submission(
             "user_email": submission.user_email
         }
     )
+
+    # Trigger Sacramental Bond cutscene automatically for Co-Link results
+    if result.archetype in (ArchetypeEnum.CO_LINK_PARTNER, "The Co-Link Partner"):
+        resp.headers["HX-Trigger"] = "launchCoLinkCutscene"
+
+    return resp
