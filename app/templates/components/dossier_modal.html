@@ -1,0 +1,96 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-archive-bg/85 backdrop-blur-md"
+     id="dossier-modal"
+     onclick="if(event.target === this) this.remove()">
+
+    <div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-sm shadow-[0_0_50px_rgba(163,15,46,0.3)] relative font-serif p-6 md:p-8 animate-fade-in">
+        
+        <!-- Close Button -->
+        <button onclick="document.getElementById('dossier-modal').remove()" 
+                class="absolute top-4 right-4 text-archive-bg hover:text-blood-900 font-mono text-xl font-bold p-1">
+            ✕
+        </button>
+
+        <!-- Modal Header -->
+        <div class="border-b-2 border-blood-950/80 pb-4 mb-6">
+            <div class="flex justify-between items-start">
+                <p class="text-xs font-mono uppercase tracking-widest text-blood-900 font-bold">Diocesan Tribunal Personnel File</p>
+                {% if character.clinical_status %}
+                    <span class="text-[10px] font-mono uppercase bg-blood-900 text-parchment-100 px-2 py-0.5 rounded font-bold">Status: Comatose</span>
+                {% endif %}
+            </div>
+            <h2 class="text-2xl md:text-3xl font-gothic text-archive-bg uppercase font-bold mt-1 tracking-wider">{{ character.full_name }}</h2>
+            <p class="text-xs font-mono text-archive-bg/80 mt-1">ALIAS: {{ character.alias or "NONE ASSIGNED" }}</p>
+        </div>
+
+        <div class="space-y-6 text-sm md:text-base leading-relaxed text-archive-bg">
+            
+            <!-- Metadata Table -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs bg-blood-900/10 p-4 border border-blood-900/30">
+                <div><span class="text-archive-bg/70 block">CLASSIFICATION:</span> <strong>{{ character.classification_class }}</strong></div>
+                <div><span class="text-archive-bg/70 block">LOCATION:</span> <strong>North Wing Infirmary (Vault 4)</strong></div>
+            </div>
+
+            <!-- Clinical Comatose Monitor (Only Active Report for Damian) -->
+            {% if character.clinical_status %}
+            <div class="bg-archive-bg text-parchment-100 p-5 rounded-sm border-2 border-blood-900 font-mono text-xs space-y-3">
+                <div class="flex justify-between items-center border-b border-blood-900/80 pb-2">
+                    <span class="text-blood-500 font-bold uppercase tracking-widest">[ CLINICAL VITAL MONITOR ]</span>
+                    <span class="flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-blood-600 animate-pulse"></span>
+                        <span class="text-[10px] text-archive-muted uppercase">LIVE RESIDUAL FEED</span>
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+                    <p><span class="text-archive-muted block">Heart Rate:</span> <span class="text-blood-500 font-bold text-sm">{{ character.clinical_status.heart_rate }}</span></p>
+                    <p><span class="text-archive-muted block">Brainwave Resonance:</span> <span class="text-parchment-300 font-bold text-sm">{{ character.clinical_status.brainwave_resonance }}</span></p>
+                    <p class="sm:col-span-2 pt-2 border-t border-blood-900/40"><span class="text-archive-muted block">Clinical Note:</span> {{ character.clinical_status.diagnostic_note }}</p>
+                    <p class="sm:col-span-2"><span class="text-archive-muted block">Threat Assessment:</span> <span class="text-blood-500 font-bold uppercase">{{ character.clinical_status.threat_assessment }}</span></p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Standard Character Bio (Renders for Non-Comatose Characters) -->
+            {% if not character.clinical_status %}
+                <div>
+                    <h3 class="text-xs font-mono uppercase text-blood-900 font-bold tracking-wider mb-2">I. Archival History</h3>
+                    <p class="text-archive-bg font-serif leading-relaxed">{{ character.biography }}</p>
+                </div>
+                {% if character.key_quotes %}
+                <div>
+                    <h3 class="text-xs font-mono uppercase text-blood-900 font-bold tracking-wider mb-2">II. Recorded Deposition Quotes</h3>
+                    <ul class="space-y-2">
+                        {% for quote in character.key_quotes %}
+                            <li class="italic bg-blood-900/10 p-3 border-l-2 border-blood-900 text-xs md:text-sm font-serif">
+                                "{{ quote }}"
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Hidden Encrypted Cyprian Trigger -->
+            {% if character.slug == 'damian-boudreaux' %}
+            <div class="bg-blood-900/10 p-4 border-l-4 border-blood-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 font-mono text-xs mt-6">
+                <span class="text-archive-bg/80">Archdiocesan Level 5 Notes Encrypted.</span>
+                <button hx-get="/dossiers/easter-egg/cyprian" 
+                        hx-target="#cyprian-vault-slot" 
+                        hx-swap="innerHTML" 
+                        class="text-blood-900 underline font-bold hover:text-blood-700">
+                    Decrypt File (CYPRIANUS) ➔
+                </button>
+            </div>
+            <div id="cyprian-vault-slot"></div>
+            {% endif %}
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="mt-8 pt-4 border-t border-blood-900/30 flex justify-end">
+            <button onclick="document.getElementById('dossier-modal').remove()" 
+                    class="bg-archive-bg text-parchment-100 font-gothic text-xs uppercase tracking-widest px-5 py-2 hover:bg-blood-950 transition-colors font-bold">
+                Close Record
+            </button>
+        </div>
+    </div>
+</div>

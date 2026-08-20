@@ -1,0 +1,48 @@
+<!-- Parchment Disciplinary Letter Container -->
+<div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 p-8 md:p-12 rounded-sm shadow-[0_0_40px_rgba(163,15,46,0.3)] max-w-3xl mx-auto my-6 font-serif relative overflow-hidden">
+    <!-- Parchment Watermark / Seal Banner -->
+    <div class="absolute top-0 right-0 -mt-6 -mr-6 w-36 h-36 border-4 border-blood-900/30 rounded-full flex items-center justify-center rotate-12 pointer-events-none">
+        <span class="text-[9px] font-mono uppercase text-blood-900/60 text-center leading-tight font-bold">Diocesan Tribunal<br>Seal of Entry</span>
+    </div>
+
+    <!-- Letterhead -->
+    <div class="border-b-2 border-blood-950/80 pb-6 mb-6 text-center">
+        <p class="text-xs font-mono uppercase tracking-[0.2em] text-blood-900 font-bold mb-1">Archdiocese of New Orleans — Registry Office</p>
+        <h2 class="text-2xl md:text-3xl font-gothic text-archive-bg uppercase tracking-tight font-bold">Official Disciplinary File</h2>
+        <p class="text-xs font-mono text-archive-bg/80 mt-2">SEAL CODE: <span class="font-bold text-blood-900">{{ letter.diocesan_seal_code }}</span></p>
+    </div>
+
+    <!-- Subject Metadata Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono uppercase bg-blood-900/10 p-4 border border-blood-900/40 mb-6">
+        <div><span class="text-archive-bg/70">Initiate Alias:</span> <strong class="text-archive-bg block text-sm font-bold">{{ letter.recipient_name }}</strong></div>
+        <div><span class="text-archive-bg/70">Assigned Frequency:</span> <strong class="text-blood-900 block text-sm font-bold">{{ letter.archetype.value }}</strong></div>
+        <div><span class="text-archive-bg/70">Classification:</span> <strong class="text-archive-bg block font-bold">{{ letter.classification_class }}</strong></div>
+        <div><span class="text-archive-bg/70">Patron Resonance:</span> <strong class="text-archive-bg block font-bold">{{ letter.patron_example }}</strong></div>
+    </div>
+
+    <!-- Assessment File Body -->
+    <div class="space-y-4 text-sm md:text-base leading-relaxed text-archive-bg">
+        <h3 class="text-xs font-mono uppercase text-blood-900 font-bold tracking-wider">I. Spiritual Summary & Assessment</h3>
+        <p class="italic bg-blood-900/10 p-4 border-l-4 border-blood-900 font-serif">
+            "{{ letter.file_summary }}"
+        </p>
+
+        <h3 class="text-xs font-mono uppercase text-blood-900 font-bold tracking-wider pt-2">II. Disciplinary Warning</h3>
+        <p class="text-xs font-mono text-blood-950 bg-blood-900/15 p-3 border border-blood-900/40">
+            ⚠️ <strong>WARNING:</strong> {{ letter.warning_notice }}
+        </p>
+    </div>
+
+    <!-- Actions / Next Steps -->
+    <div class="mt-8 pt-6 border-t border-blood-900/30 text-center space-y-4">
+        <p class="text-xs font-mono text-archive-bg/80">A copy of this seal has been dispatched to <strong>{{ user_email }}</strong>.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+            <a href="/dossiers" class="bg-archive-bg hover:bg-archive-card text-parchment-100 font-gothic px-6 py-3 text-xs uppercase tracking-widest transition-colors font-bold border border-archive-border">
+                Inspect Character Dossiers
+            </a>
+            <a href="/interactive" class="bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic px-6 py-3 text-xs uppercase tracking-widest transition-colors font-bold border border-blood-600">
+                Enter Script Engine
+            </a>
+        </div>
+    </div>
+</div>

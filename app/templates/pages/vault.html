@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-12 px-4 sm:px-6">
+    <!-- Header -->
+    <header class="text-center mb-12 border-b border-blood-900/60 pb-8">
+        <p class="text-xs font-mono uppercase tracking-[0.3em] text-blood-500 font-bold mb-2">ARCHDIOCESE OF NEW ORLEANS — PUBLIC VAULT</p>
+        <h1 class="text-3xl md:text-5xl font-gothic text-parchment-100 mb-3 tracking-wider uppercase font-bold">Classified Book Library</h1>
+        <p class="text-sm md:text-base text-parchment-300 max-w-2xl mx-auto font-serif">
+            Official PDF repository for <strong class="text-amber-400">The Reform School for Witches Series</strong>. Registered Academy initiates gain complimentary PDF download access to all volume releases.
+        </p>
+    </header>
+
+    <!-- Authentication Status Banner -->
+    <div id="vault-status-banner" class="mb-10">
+        {% if is_authenticated %}
+            <div class="bg-archive-card border border-blood-700/80 p-4 rounded-sm flex justify-between items-center font-mono text-xs">
+                <span class="text-amber-400 font-bold flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    CLEARANCE GRANTED: Initiate Access Active
+                </span>
+                <span class="text-archive-muted">All Available Vault PDF Downloads Unlocked</span>
+            </div>
+        {% else %}
+            <div class="bg-blood-950/60 border border-blood-800 p-6 rounded-sm flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-xs">
+                <div>
+                    <span class="text-blood-500 font-bold uppercase block tracking-wider mb-1">🔒 ARCHIVAL CLEARANCE REQUIRED</span>
+                    <p class="text-parchment-300 font-serif text-sm">Register as an Academy initiate to unlock free PDF downloads of the series.</p>
+                </div>
+                <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
+                        class="bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic px-6 py-3 uppercase tracking-widest text-xs rounded-sm shadow-md border border-blood-600 transition-all font-bold shrink-0">
+                    ✝ Request Free Access
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Books Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for book in books %}
+        <div class="bg-archive-card border border-archive-border hover:border-blood-700 p-6 rounded-sm shadow-xl flex flex-col justify-between transition-all group">
+            
+            <div class="space-y-4">
+                <!-- Book Cover Image -->
+                <div class="w-full aspect-[2/3] bg-archive-bg border border-archive-border rounded-sm overflow-hidden relative">
+                    <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500">
+                    <span class="absolute top-2 left-2 bg-archive-bg/90 border border-blood-800 text-amber-400 font-mono text-[9px] uppercase px-2 py-0.5 rounded font-bold">
+                        {{ book.release_status }}
+                    </span>
+                </div>
+
+                <!-- Book Info -->
+                <div>
+                    <p class="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-widest mb-1">{{ book.subtitle }}</p>
+                    <h3 class="text-2xl font-gothic text-parchment-100 uppercase tracking-wider font-bold mb-2">{{ book.title }}</h3>
+                    <p class="text-xs font-serif italic text-blood-500 mb-3">"{{ book.tagline }}"</p>
+                    <p class="text-xs font-serif text-parchment-300 leading-relaxed">{{ book.description }}</p>
+                </div>
+            </div>
+
+            <!-- Download / Release Status Trigger -->
+            <div class="pt-6 border-t border-archive-border font-mono text-xs mt-6">
+                {% if not book.is_released %}
+                    <!-- UNRELEASED STATE -->
+                    <button disabled 
+                            class="w-full bg-archive-bg/50 border border-blood-900/60 text-archive-muted font-gothic py-3 px-4 rounded-sm cursor-not-allowed flex justify-center items-center gap-2 uppercase tracking-wider font-bold">
+                        <span>🔒</span> Sealed Archival Record (Coming Soon)
+                    </button>
+                {% elif is_authenticated %}
+                    <!-- RELEASED & AUTHENTICATED STATE -->
+                    <a href="/vault/download/{{ book.id }}" 
+                       download
+                       class="w-full bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 border border-blood-600 font-bold uppercase tracking-wider">
+                        <span>📥</span> Download PDF File
+                    </a>
+                {% else %}
+                    <!-- RELEASED & UNAUTHENTICATED STATE -->
+                    <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
+                            class="w-full bg-archive-bg hover:bg-blood-950/80 border border-archive-border hover:border-blood-700 text-parchment-200 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 font-bold uppercase tracking-wider">
+                        <span>🔒</span> Register to Unlock Free PDF
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Member Registration Modal -->
+<div id="register-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-archive-bg/85 backdrop-blur-md">
+    <div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 max-w-md w-full p-6 md:p-8 rounded-sm shadow-2xl relative font-serif">
+        <button onclick="document.getElementById('register-modal').classList.add('hidden')" class="absolute top-4 right-4 text-archive-bg font-mono font-bold text-xl">✕</button>
+
+        <div id="registration-form-container">
+            <p class="text-xs font-mono uppercase tracking-widest text-blood-900 font-bold mb-1">Diocesan Access Portal</p>
+            <h2 class="text-2xl font-gothic text-archive-bg font-bold uppercase tracking-wider mb-2">Initiate Registration</h2>
+            <p class="text-xs text-archive-bg/80 font-serif mb-6 leading-relaxed">
+                Enter your details to register as an official reader and gain immediate, unrestricted PDF download access to all RSFW Series releases.
+            </p>
+
+            <form hx-post="/vault/register" hx-target="#registration-form-container" hx-swap="innerHTML" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block text-blood-900 font-bold uppercase mb-1">Code Name / Alias *</label>
+                    <input type="text" name="alias" required placeholder="Initiate Claire" class="w-full bg-archive-bg text-parchment-100 px-3 py-2 border border-blood-900 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-blood-900 font-bold uppercase mb-1">Email Registry *</label>
+                    <input type="email" name="email" required placeholder="initiate@diocesan.org" class="w-full bg-archive-bg text-parchment-100 px-3 py-2 border border-blood-900 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic py-3 uppercase tracking-widest font-bold mt-2 transition-colors">
+                    ✝ Grant Vault Clearance
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-12 px-4 sm:px-6">
+    <!-- Header -->
+    <header class="text-center mb-12 border-b border-blood-900/60 pb-8">
+        <p class="text-xs font-mono uppercase tracking-[0.3em] text-blood-500 font-bold mb-2">ARCHDIOCESE OF NEW ORLEANS — RESTRICTED PERSONNEL</p>
+        <h1 class="text-3xl md:text-5xl font-gothic text-parchment-100 mb-3 tracking-wider uppercase font-bold">Personnel Files</h1>
+        <p class="text-sm md:text-base text-parchment-300 max-w-2xl mx-auto font-serif">
+            Inspect official personnel records, sacramental affinities, and classified threat assessments of initiates and guardians assigned to Our Lady of Tears Academy.
+        </p>
+    </header>
+
+    <!-- Dossier Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for character in characters %}
+            {% include "components/character_card.html" %}
+        {% endfor %}
+    </div>
+
+    <!-- Dynamic Modal Target Container for HTMX -->
+    <div id="dossier-modal-container"></div>
+</div>
+{% endblock %}
