@@ -17,8 +17,9 @@ async def send_diocesan_assessment_email(
     recipient_email: str,
     recipient_alias: str,
     archetype_title: str,
-    letter_body_html: str
+    letter_obj: object
 ) -> bool:
+    """Dispatches a beautifully formatted Diocesan Assessment Letter via Brevo REST API."""
     if not BREVO_API_KEY:
         logger.error("BREVO_API_KEY is missing. Skipping email dispatch.")
         return False
@@ -29,6 +30,14 @@ async def send_diocesan_assessment_email(
         "content-type": "application/json"
     }
 
+    # Extract fields safely from Pydantic DiocesanLetter or fallback to attributes
+    classification = getattr(letter_obj, "classification_class", "Academy Initiate")
+    patron = getattr(letter_obj, "patron_example", "St. Michael the Archangel")
+    summary = getattr(letter_obj, "file_summary", "Record pending classification.")
+    warning = getattr(letter_obj, "warning_notice", "Maintain spiritual vigilance.")
+    seal_code = getattr(letter_obj, "diocesan_seal_code", "OLT-ARCHIVE-RESTRICTED")
+
+    # Beautiful Dark Academia Email Layout
     full_html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -36,59 +45,94 @@ async def send_diocesan_assessment_email(
         <meta charset="utf-8">
         <style>
             body {{
-                background-color: #0d0a0b;
-                color: #e6dfd5;
+                background-color: #0b0809;
+                color: #e5dfd5;
                 font-family: Georgia, 'Times New Roman', serif;
-                padding: 20px;
+                padding: 20px 10px;
                 margin: 0;
             }}
             .container {{
-                max-width: 600px;
+                max-width: 580px;
                 margin: 0 auto;
-                background-color: #140f11;
+                background-color: #120d0f;
                 border: 2px solid #5c0a1a;
-                padding: 30px;
+                padding: 32px 28px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.8);
             }}
             .header {{
                 text-align: center;
-                border-bottom: 1px solid #5c0a1a;
-                padding-bottom: 15px;
-                margin-bottom: 20px;
+                border-bottom: 2px solid #5c0a1a;
+                padding-bottom: 18px;
+                margin-bottom: 24px;
             }}
             .seal {{
-                font-size: 24px;
+                font-size: 28px;
                 color: #a30f2e;
+                margin-bottom: 6px;
             }}
             .sub-title {{
-                font-family: monospace;
+                font-family: 'Courier New', Courier, monospace;
                 font-size: 10px;
                 color: #a30f2e;
                 letter-spacing: 2px;
                 text-transform: uppercase;
+                margin-bottom: 4px;
             }}
             .title {{
-                color: #e6dfd5;
+                color: #f2ece4;
                 font-size: 20px;
                 text-transform: uppercase;
-                margin: 5px 0;
+                letter-spacing: 1px;
+                margin: 0;
             }}
-            .content {{
-                font-size: 14px;
-                line-height: 1.6;
-                color: #c9c0b5;
+            .meta-grid {{
+                background-color: #1a1215;
+                border-left: 3px solid #a30f2e;
+                padding: 12px 16px;
+                margin-bottom: 24px;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 11px;
+                line-height: 1.8;
+                color: #c4b9ad;
             }}
-            .archetype {{
-                color: #f59e0b;
+            .meta-label {{
+                color: #a30f2e;
                 font-weight: bold;
+                text-transform: uppercase;
+            }}
+            .content-section {{
+                font-size: 14px;
+                line-height: 1.7;
+                color: #d6ccc0;
+                margin-bottom: 20px;
+            }}
+            .warning-box {{
+                background-color: #24080e;
+                border: 1px dashed #a30f2e;
+                padding: 14px 16px;
+                margin-top: 24px;
+                font-size: 13px;
+                color: #fca5a5;
+                line-height: 1.5;
+            }}
+            .warning-header {{
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 10px;
+                color: #ef4444;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 6px;
             }}
             .footer {{
-                margin-top: 30px;
-                border-top: 1px solid #332226;
-                padding-top: 15px;
-                font-family: monospace;
-                font-size: 10px;
-                color: #786d65;
+                margin-top: 32px;
+                border-top: 1px solid #2e1a1e;
+                padding-top: 16px;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 9px;
+                color: #6b5e56;
                 text-align: center;
+                line-height: 1.5;
             }}
         </style>
     </head>
@@ -96,21 +140,31 @@ async def send_diocesan_assessment_email(
         <div class="container">
             <div class="header">
                 <div class="seal">✝</div>
-                <div class="sub-title">Our Lady of Tears Academy — Diagnostic Record</div>
-                <h1 class="title">Official Disciplinary Clearance</h1>
+                <div class="sub-title">Archdiocese of New Orleans • Official Registry</div>
+                <h1 class="title">Disciplinary Assessment File</h1>
             </div>
-            <div class="content">
-                <p><strong>Initiate {recipient_alias},</strong></p>
-                <p>Your diagnostic submission has been logged into the Academy Registry.</p>
-                <p>Assigned Frequency Profile: <span class="archetype">{archetype_title}</span></p>
-                <hr style="border: 0; border-top: 1px solid #5c0a1a; margin: 20px 0;">
-                <div>
-                    {letter_body_html}
-                </div>
+
+            <div class="meta-grid">
+                <div><span class="meta-label">INITIATE ALIAS:</span> {recipient_alias}</div>
+                <div><span class="meta-label">CLASSIFICATION:</span> {classification}</div>
+                <div><span class="meta-label">AFFINITY PATRON:</span> {patron}</div>
+                <div><span class="meta-label">RECORD SEAL:</span> {seal_code}</div>
             </div>
+
+            <div class="content-section">
+                <p style="margin-top: 0;"><strong>Initiate {recipient_alias},</strong></p>
+                <p>{summary}</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-header">⚠️ ARCHIVAL DISCIPLINARY NOTICE</div>
+                <div>{warning}</div>
+            </div>
+
             <div class="footer">
-                CONFIDENTIAL DIOCESAN TRANSMISSION • THE REFORM SCHOOL FOR WITCHES (rsfwseries.com)<br>
-                Do not forward this record outside consecrated channels.
+                CONFIDENTIAL DIOCESAN TRANSMISSION • OUR LADY OF TEARS ACADEMY<br>
+                THE REFORM SCHOOL FOR WITCHES (rsfwseries.com)<br>
+                Do not forward this disciplinary record outside consecrated channels.
             </div>
         </div>
     </body>
@@ -128,7 +182,7 @@ async def send_diocesan_assessment_email(
                 "name": recipient_alias
             }
         ],
-        "subject": f"✝ [Academy Diagnostic File] Assessment Record for Initiate {recipient_alias}",
+        "subject": f"✝ [Diocesan File] Official Disciplinary Record: Initiate {recipient_alias}",
         "htmlContent": full_html_content
     }
 
