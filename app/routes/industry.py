@@ -5,19 +5,21 @@ from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-INDUSTRY_PASSKEY = "SACRAMENTAL2026"  # Set your desired access code here
+INDUSTRY_PASSKEY = "SACRAMENTAL2026"  # Passkey code
 
 
 @router.get("/", response_class=HTMLResponse)
-async def render_industry_portal(request: Request):
-    """Renders the standard industry portal layout."""
+async def render_industry_portal(request: Request, access: str = ""):
+    """Renders the executive pitch deck or passkey lock screen."""
+    is_authorized = (access == "granted")
+    
     return templates.TemplateResponse(
         request=request,
         name="pages/industry.html",
         context={
             "page_title": "Industry & Production Portal | The Reform School for Witches",
             "meta_description": "Series overview, pitch materials, demographic metrics, and multi-season character transformation arcs for executive partners.",
-            "authorized": False,
+            "authorized": is_authorized,
             "seasons": [
                 {
                     "number": "Season 1",
@@ -44,7 +46,7 @@ async def render_industry_portal(request: Request):
 
 @router.post("/verify", response_class=HTMLResponse)
 async def verify_industry_access(request: Request, passkey: str = Form(...)):
-    """Verifies access code and returns the unlocked pitch deck or error fragment."""
+    """Verifies access code and triggers instant JS window redirect."""
     if passkey.strip().upper() != INDUSTRY_PASSKEY:
         return HTMLResponse(
             content='''
@@ -55,7 +57,12 @@ async def verify_industry_access(request: Request, passkey: str = Form(...)):
             status_code=status.HTTP_401_UNAUTHORIZED
         )
 
-    # Return HTMX redirect trigger upon successful code entry
-    response = HTMLResponse(content="")
-    response.headers["HX-Redirect"] = "/industry?access=granted"
-    return response
+    # Return explicit JS redirect tag that HTMX executes automatically
+    return HTMLResponse(
+        content='''
+        <script>
+            window.location.href = "/industry?access=granted";
+        </script>
+        ''',
+        status_code=status.HTTP_200_OK
+    )
