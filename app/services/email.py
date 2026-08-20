@@ -1,12 +1,15 @@
 import os
 import logging
 import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger("uvicorn.error")
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "hello@rsfwseries.com")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "admin@anomik.io")
 SENDER_NAME = os.getenv("SENDER_NAME", "Our Lady of Tears Academy")
 
 
