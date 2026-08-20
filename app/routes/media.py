@@ -51,20 +51,31 @@ CUTSCENE_DB = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_cinematics_gallery(request: Request):
-    """Renders the main Cinematics Gallery Page."""
+    """Renders the Cinematics Gallery with authentication awareness."""
+    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+
     return templates.TemplateResponse(
         request=request,
         name="pages/cinematics.html",
         context={
             "page_title": "Cinematic Archives | The Reform School for Witches",
             "meta_description": "Stream official animated cutscenes from The Reform School for Witches Series (rsfwseries.com).",
-            "cutscenes": list(CUTSCENE_DB.values())
+            "cutscenes": list(CUTSCENE_DB.values()),
+            "is_authenticated": is_authenticated
         }
     )
 
 @router.get("/cutscene/{scene_id}", response_class=HTMLResponse)
 async def get_cutscene_modal(request: Request, scene_id: str):
-    """Returns the HTMX video player modal overlay."""
+    """Returns the video modal or blocks non-subscribers."""
+    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+    
+    if not is_authenticated:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Diocesan Clearance Required. Subscriber access required to view archives."
+        )
+
     scene = CUTSCENE_DB.get(scene_id)
     if not scene:
         raise HTTPException(status_code=404, detail="Cinematic record missing.")
