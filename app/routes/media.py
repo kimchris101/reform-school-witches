@@ -10,23 +10,23 @@ CUTSCENE_DB = {
     "greenhouse-rain": {
         "id": "greenhouse-rain",
         "title": "I. Rain at the Greenhouse",
-        "subtitle": "The Blood Lily Tether",
+        "subtitle": "The Sanguine Tether",
         "video_url": "/static/media/cutscenes/greenhouse_rain.mp4",
         "classification": "Memory Record #001",
-        "description": "Kimbra and Damian outside the Academy glasshouse during a sudden downpour as the Sanguine tether tightens."
+        "description": "Kimbra and Damian outside the Boudreaux Estate Greenhouse during a sudden downpour as the Sanguine tether tightens."
     },
     "library-awakening": {
         "id": "library-awakening",
-        "title": "II. Shadows in the Archival Vault",
+        "title": "II. Shadows in the Boudreaux Library",
         "subtitle": "The Crimson Resonance",
         "video_url": "/static/media/cutscenes/library_awakening.mp4",
         "classification": "Classified Log #009",
-        "description": "In the Cathedral archives, a dark presence manifests as red eyes ignite in the gloom."
+        "description": "After the ceremony, a dark presence manifests as red eyes ignite in the gloom."
     },
     "reminiscence": {
         "id": "reminiscence",
         "title": "III. Fractured Reminiscence",
-        "subtitle": "The Innocence Before the Root",
+        "subtitle": "The Innocence Before the Ritual",
         "video_url": "/static/media/cutscenes/reminiscence.mp4",
         "classification": "Restricted Flashback Feed",
         "description": "A haunting montage tracing years of stolen moments, masquerade balls, fireflies, and unfulfilled promises."
@@ -37,15 +37,15 @@ CUTSCENE_DB = {
         "subtitle": "Sacramental Steel & Light",
         "video_url": "/static/media/cutscenes/sacramental_bond.mp4",
         "classification": "Diocesan Rite Log #042",
-        "description": "Roman De La Croix seals the Co-Link bond, channeling golden holy light to interlock their spiritual frequencies."
+        "description": "Roman De La Croix seals the Co-Link bond, a golden holy light manifests to interlock their spiritual frequencies."
     },
     "masquerade-shatter": {
         "id": "masquerade-shatter",
-        "title": "V. The Shattered Chalice",
-        "subtitle": "Balcony at the Grand Masquerade",
+        "title": "V. The Shattered Glass",
+        "subtitle": "Trapped inside a nightmare.",
         "video_url": "/static/media/cutscenes/masquerade_shatter.mp4",
-        "classification": "Perimeter Surveillance Feed",
-        "description": "Watching from the balcony during the masquerade, Roman grips his champagne flute until the glass shatters."
+        "classification": "Dream Surveillance Feed",
+        "description": "Inside Roman's nightmare, watching from the balcony during the masquerade, He grips his champagne flute until the glass shatters."
     }
 }
 
