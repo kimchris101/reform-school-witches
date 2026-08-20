@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Request, Form, HTTPException, status
+from fastapi import APIRouter, Request, Form, HTTPException, status, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 
 from app.models.schemas import QuizSubmission, QuizAnswer, ArchetypeEnum
 from app.services.scoring import evaluate_intake_exam
+from app.services.email import send_diocesan_assessment_email
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+
 @router.get("/", response_class=HTMLResponse)
 async def render_intake_page(request: Request):
+    """Renders the main Academy Intake Diagnostic Exam page."""
     return templates.TemplateResponse(
         request=request,
         name="pages/intake.html",
@@ -20,24 +23,25 @@ async def render_intake_page(request: Request):
         }
     )
 
+
 @router.post("/evaluate", response_class=HTMLResponse)
 async def evaluate_intake_submission(
     request: Request,
+    background_tasks: BackgroundTasks,
     user_email: str = Form(...),
     user_alias: str = Form(...),
     q1: str = Form(...),
     q2: str = Form(...),
     q3: str = Form(...),
-    q4: str = Form(...),
-    q5: str = Form(...)
+    q4: str = Form(...)
 ):
+    """Processes intake choices via HTMX, triggers email delivery, and returns the result."""
     try:
         answers = [
             QuizAnswer(question_id=1, selected_option=q1),
             QuizAnswer(question_id=2, selected_option=q2),
             QuizAnswer(question_id=3, selected_option=q3),
             QuizAnswer(question_id=4, selected_option=q4),
-            QuizAnswer(question_id=5, selected_option=q5),
         ]
         
         submission = QuizSubmission(
@@ -51,7 +55,17 @@ async def evaluate_intake_submission(
             detail=f"Invalid diagnostic submission: {err.errors()}"
         )
 
+    # Calculate result & generate letter payload
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
+
+    # Dispatch Brevo email in the background without delaying user UI
+    background_tasks.add_task(
+        send_diocesan_assessment_email,
+        recipient_email=submission.user_email,
+        recipient_alias=submission.user_alias,
+        archetype_title=str(result.archetype),
+        letter_body_html=result.diocesan_letter
+    )
 
     resp = templates.TemplateResponse(
         request=request,
