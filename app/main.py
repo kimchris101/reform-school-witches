@@ -9,7 +9,7 @@ from app.routes import intake, dossier, media, interactive, vault, industry
 
 app = FastAPI(
     title="The Reform School for Witches Series - Reader Portal API",
-    description="Backend engine for interactive visual novel choices, archetype intake diagnostics, cinematic unlocks, and classified book vault.",
+    description="Backend engine for interactive visual novel choices, archetype intake diagnostics, cinematic unlocks, classified book vault, and industry pitch portal.",
     version="1.0.0"
 )
 
@@ -65,6 +65,7 @@ async def get_sitemap():
         {"loc": "/vault", "changefreq": "weekly", "priority": "0.9"},
         {"loc": "/media", "changefreq": "weekly", "priority": "0.8"},
         {"loc": "/interactive", "changefreq": "monthly", "priority": "0.7"},
+        {"loc": "/industry", "changefreq": "monthly", "priority": "0.6"},
     ]
 
     xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -91,6 +92,8 @@ async def get_robots():
         "Allow: /dossiers\n"
         "Allow: /vault\n"
         "Allow: /media\n"
+        "Allow: /interactive\n"
+        "Allow: /industry\n"
         "Disallow: /dossiers/easter-egg/\n"
         "Disallow: /vault/download/\n\n"
         "Sitemap: https://rsfwseries.com/sitemap.xml\n"
