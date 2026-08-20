@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-12 px-4 sm:px-6">
+    <header class="text-center mb-12 border-b border-blood-900/60 pb-8">
+        <p class="text-xs font-mono uppercase tracking-[0.3em] text-blood-500 font-bold mb-2">ARCHDIOCESE OF NEW ORLEANS — SURVEILLANCE VAULT</p>
+        <h1 class="text-3xl md:text-5xl font-gothic text-parchment-100 mb-3 tracking-wider uppercase font-bold">Cinematic Cutscene Archives</h1>
+        <p class="text-sm md:text-base text-parchment-300 max-w-2xl mx-auto font-serif">
+            Stream official animated story cutscenes and memory logs from <strong class="text-amber-400">The Reform School for Witches Series</strong>.
+        </p>
+    </header>
+
+    <!-- Cinematics Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for scene in cutscenes %}
+        <div class="bg-archive-card border border-archive-border hover:border-blood-700 p-5 rounded-sm shadow-xl flex flex-col justify-between transition-all group">
+            <div class="space-y-4">
+                <!-- Video Thumbnail Box -->
+                <div class="w-full aspect-video bg-archive-bg border border-archive-border rounded-sm overflow-hidden relative flex items-center justify-center">
+                    <video class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500" muted preload="metadata">
+                        <source src="{{ scene.video_url }}#t=0.5" type="video/mp4">
+                    </video>
+                    <div class="absolute inset-0 bg-archive-bg/40 group-hover:bg-transparent transition-colors flex items-center justify-center">
+                        <span class="w-12 h-12 rounded-full bg-blood-900/90 border border-blood-600 flex items-center justify-center text-parchment-100 text-lg shadow-lg group-hover:scale-110 transition-transform">▶</span>
+                    </div>
+                    <span class="absolute top-2 left-2 bg-archive-bg/90 border border-blood-800 text-amber-400 font-mono text-[9px] uppercase px-2 py-0.5 rounded font-bold">
+                        {{ scene.classification }}
+                    </span>
+                </div>
+
+                <!-- Info -->
+                <div>
+                    <p class="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-widest mb-1">{{ scene.subtitle }}</p>
+                    <h3 class="text-xl font-gothic text-parchment-100 uppercase tracking-wider font-bold mb-2">{{ scene.title }}</h3>
+                    <p class="text-xs font-serif text-parchment-300 leading-relaxed">{{ scene.description }}</p>
+                </div>
+            </div>
+
+            <button hx-get="/media/cutscene/{{ scene.id }}" 
+                    hx-target="body" 
+                    hx-swap="beforeend"
+                    class="mt-6 w-full bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 border border-blood-600 font-bold uppercase tracking-wider text-xs">
+                <span>▶</span> Stream Cinematic Cutscene
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
