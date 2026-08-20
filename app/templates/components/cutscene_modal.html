@@ -4,7 +4,7 @@
 
     <div class="bg-archive-card border-2 border-blood-800 max-w-3xl w-full rounded-sm shadow-[0_0_50px_rgba(163,15,46,0.4)] relative font-mono overflow-hidden animate-fade-in">
         
-        <!-- Bar -->
+        <!-- Header -->
         <div class="bg-archive-bg border-b border-blood-900/80 p-3 flex justify-between items-center text-xs">
             <div class="flex items-center gap-2">
                 <span class="inline-block w-2.5 h-2.5 rounded-full bg-blood-600 animate-pulse"></span>
@@ -16,15 +16,23 @@
             </button>
         </div>
 
-        <!-- Video Player -->
-        <div class="relative bg-black aspect-video flex items-center justify-center">
+        <!-- Video Container -->
+        <div class="relative bg-black aspect-video flex items-center justify-center group">
             <video id="cutscene-player" 
                    autoplay 
+                   muted 
+                   playsinline 
                    controls 
                    class="w-full h-full object-contain">
                 <source src="{{ scene.video_url }}" type="video/mp4">
-                Your terminal viewport does not support HTML5 video playback.
             </video>
+
+            <!-- Safari Unmute Prompt -->
+            <button id="safari-unmute-btn" 
+                    onclick="const v = document.getElementById('cutscene-player'); v.muted = false; v.play(); this.classList.add('hidden');"
+                    class="absolute z-30 bg-blood-900/90 hover:bg-blood-800 border border-blood-600 text-parchment-100 font-mono text-xs px-4 py-2 rounded-sm shadow-xl flex items-center gap-2 uppercase tracking-widest font-bold">
+                🔊 Tap to Enable Audio
+            </button>
         </div>
 
         <!-- Metadata Footer -->
@@ -34,3 +42,25 @@
         </div>
     </div>
 </div>
+
+<script>
+  // Safari Autoplay Guarantee Script
+  (function() {
+    const player = document.getElementById('cutscene-player');
+    const unmuteBtn = document.getElementById('safari-unmute-btn');
+    
+    if (player) {
+      const promise = player.play();
+      if (promise !== undefined) {
+        promise.then(() => {
+          // Playing successfully (muted)
+        }).catch(error => {
+          // Safari blocked playback; show explicit play overlay
+          if (unmuteBtn) {
+            unmuteBtn.innerText = "▶ Tap to Start Playback";
+          }
+        });
+      }
+    }
+  })();
+</script>
