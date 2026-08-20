@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import Response
 
 from app.routes import intake, dossier, media, interactive, vault
 
@@ -39,6 +39,7 @@ app.include_router(media.router, prefix="/media", tags=["Cinematic Unlocks"])
 app.include_router(interactive.router, prefix="/interactive", tags=["Interactive Script Engine"])
 app.include_router(vault.router, prefix="/vault", tags=["Book Vault"])
 
+
 @app.get("/", include_in_schema=False)
 async def read_root(request: Request):
     return templates.TemplateResponse(
@@ -49,6 +50,7 @@ async def read_root(request: Request):
             "meta_description": "Step into the Southern Gothic Sacramental Noir universe. Complete your Academy Intake Exam at Our Lady of Tears Academy, inspect classified character dossiers, and navigate interactive visual novel choices."
         }
     )
+
 
 @app.get("/sitemap.xml", include_in_schema=False)
 async def get_sitemap():
@@ -78,6 +80,7 @@ async def get_sitemap():
 
     return Response(content=xml_content, media_type="application/xml")
 
+
 @app.get("/robots.txt", include_in_schema=False)
 async def get_robots():
     """Returns robots.txt rules for web crawlers."""
@@ -93,6 +96,7 @@ async def get_robots():
     )
     return Response(content=content, media_type="text/plain")
 
+
 @app.get("/healthz", tags=["System"])
 async def health_check():
     return {
@@ -100,4 +104,3 @@ async def health_check():
         "academy": "Our Lady of Tears",
         "environment": os.getenv("ENVIRONMENT", "development")
     }
-

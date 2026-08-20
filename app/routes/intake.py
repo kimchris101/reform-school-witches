@@ -58,13 +58,20 @@ async def evaluate_intake_submission(
     # Calculate result & generate letter payload
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
 
+    # Convert Pydantic model safely to a string/representation for the email body
+    letter_html = (
+        getattr(result.diocesan_letter, "assessment_notes", None)
+        or getattr(result.diocesan_letter, "full_text", None)
+        or str(result.diocesan_letter)
+    )
+
     # Dispatch Brevo email in the background without delaying user UI
     background_tasks.add_task(
         send_diocesan_assessment_email,
         recipient_email=submission.user_email,
         recipient_alias=submission.user_alias,
         archetype_title=str(result.archetype),
-        letter_body_html=result.diocesan_letter
+        letter_body_html=letter_html
     )
 
     resp = templates.TemplateResponse(
