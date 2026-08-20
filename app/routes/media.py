@@ -21,7 +21,7 @@ CUTSCENE_DB = {
         "subtitle": "The Crimson Resonance",
         "video_url": "/static/media/cutscenes/library_awakening.mp4",
         "classification": "Classified Log #009",
-        "description": "After the ceremony, a dark presence manifests as red eyes ignite in the gloom."
+        "description": "After the dark ritual, an evil presence manifests as red eyes ignite in the gloom."
     },
     "reminiscence": {
         "id": "reminiscence",
@@ -36,7 +36,7 @@ CUTSCENE_DB = {
         "title": "IV. Sanctification of the Co-Link",
         "subtitle": "Sacramental Steel & Light",
         "video_url": "/static/media/cutscenes/sacramental_bond.mp4",
-        "classification": "Diocesan Rite Log #042",
+        "classification": "Diocesan Log #042",
         "description": "Roman De La Croix seals the Co-Link bond, a golden holy light manifests to interlock their spiritual frequencies."
     },
     "masquerade-shatter": {
@@ -44,7 +44,7 @@ CUTSCENE_DB = {
         "title": "V. The Shattered Glass",
         "subtitle": "Trapped inside a nightmare.",
         "video_url": "/static/media/cutscenes/masquerade_shatter.mp4",
-        "classification": "Dream Surveillance Feed",
+        "classification": "Dream Sequence Feed",
         "description": "Inside Roman's nightmare, watching from the balcony during the masquerade, He grips his champagne flute until the glass shatters."
     }
 }
