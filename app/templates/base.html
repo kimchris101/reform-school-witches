@@ -120,5 +120,12 @@
     htmx.ajax('GET', '/media/cutscene/library-awakening', { target: 'body', swap: 'beforeend' });
   });
 </script>
+<!-- Main Content Block -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Footer Component -->
+    {% include "components/footer.html" %}
 </body>
 </html>
