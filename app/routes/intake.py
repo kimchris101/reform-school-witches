@@ -33,7 +33,8 @@ async def evaluate_intake_submission(
     q1: str = Form(...),
     q2: str = Form(...),
     q3: str = Form(...),
-    q4: str = Form(...)
+    q4: str = Form(...),
+    q5: str = Form(...)
 ):
     """Processes intake choices via HTMX, triggers email delivery, and returns the result."""
     try:
@@ -42,6 +43,7 @@ async def evaluate_intake_submission(
             QuizAnswer(question_id=2, selected_option=q2),
             QuizAnswer(question_id=3, selected_option=q3),
             QuizAnswer(question_id=4, selected_option=q4),
+            QuizAnswer(question_id=5, selected_option=q5),
         ]
         
         submission = QuizSubmission(
@@ -58,20 +60,13 @@ async def evaluate_intake_submission(
     # Calculate result & generate letter payload
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
 
-    # Convert Pydantic model safely to a string/representation for the email body
-    letter_html = (
-        getattr(result.diocesan_letter, "assessment_notes", None)
-        or getattr(result.diocesan_letter, "full_text", None)
-        or str(result.diocesan_letter)
-    )
-
-    # Dispatch Brevo email in the background without delaying user UI
+    # Queue background task to send the styled email via Brevo API using letter_obj
     background_tasks.add_task(
         send_diocesan_assessment_email,
         recipient_email=submission.user_email,
         recipient_alias=submission.user_alias,
         archetype_title=str(result.archetype),
-        letter_body_html=letter_html
+        letter_obj=result.diocesan_letter
     )
 
     resp = templates.TemplateResponse(
