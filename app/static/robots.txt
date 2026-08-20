@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /dossiers
+Allow: /vault
+Allow: /media
+Disallow: /dossiers/easter-egg/
+Disallow: /vault/download/
