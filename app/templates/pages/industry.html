@@ -2,9 +2,40 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-8 space-y-8 font-serif text-parchment-200">
+
+    {% if not authorized %}
+    <!-- Gated Access Terminal Screen -->
+    <div class="max-w-md mx-auto my-12 bg-archive-card border border-amber-900/80 p-8 rounded-sm space-y-6 text-center">
+        <div class="space-y-2">
+            <span class="text-xs font-mono uppercase tracking-widest text-amber-500 font-bold">[ RESTRICTED TERMINAL ]</span>
+            <h1 class="text-2xl font-gothic text-parchment-100 uppercase tracking-wider">Producer Clearance</h1>
+            <p class="text-xs font-serif text-parchment-300">
+                This terminal contains confidential multi-season pitch assets and market analytics. Enter your executive passkey to proceed.
+            </p>
+        </div>
+
+        <form hx-post="/industry/verify" 
+              hx-target="#passkey-error" 
+              hx-swap="outerHTML" 
+              class="space-y-4">
+            <input type="password" 
+                   name="passkey" 
+                   placeholder="ENTER PASSKEY" 
+                   required 
+                   class="w-full bg-archive-bg border border-amber-900/80 text-amber-200 placeholder-amber-800/60 text-xs font-mono uppercase px-4 py-3 rounded-sm text-center focus:outline-none focus:border-amber-500 tracking-widest" />
+            
+            <button type="submit" 
+                    class="w-full bg-amber-950/80 hover:bg-amber-900 text-amber-200 border border-amber-800 text-xs font-mono uppercase tracking-widest px-4 py-3 rounded-sm transition-colors font-bold">
+                Unlock Deck 🔓
+            </button>
+            <div id="passkey-error"></div>
+        </form>
+    </div>
+
+    {% else %}
     <!-- Executive Header -->
     <div class="border-b-2 border-blood-900 pb-6">
-        <span class="text-xs font-mono uppercase tracking-widest text-blood-500 font-bold">[ EXECUTIVE PITCH DECK ]</span>
+        <span class="text-xs font-mono uppercase tracking-widest text-blood-500 font-bold">[ EXECUTIVE PITCH DECK • UNLOCKED ]</span>
         <h1 class="text-3xl md:text-5xl font-gothic text-parchment-100 uppercase tracking-wider mt-1">The Reform School for Witches</h1>
         <p class="text-sm md:text-base text-parchment-300 font-serif italic mt-2">Southern Gothic Sacramental Noir • Multi-Season Television Adaptation</p>
     </div>
@@ -39,5 +70,7 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
+
 </div>
 {% endblock %}
