@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 space-y-8 font-serif text-parchment-200">
+    <!-- Executive Header -->
+    <div class="border-b-2 border-blood-900 pb-6">
+        <span class="text-xs font-mono uppercase tracking-widest text-blood-500 font-bold">[ EXECUTIVE PITCH DECK ]</span>
+        <h1 class="text-3xl md:text-5xl font-gothic text-parchment-100 uppercase tracking-wider mt-1">The Reform School for Witches</h1>
+        <p class="text-sm md:text-base text-parchment-300 font-serif italic mt-2">Southern Gothic Sacramental Noir • Multi-Season Television Adaptation</p>
+    </div>
+
+    <!-- Pitch Overview & Target Demographic -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+        <div class="bg-archive-card border border-archive-border p-5 rounded-sm space-y-2">
+            <span class="text-blood-500 font-bold uppercase">GENRE HYBRID</span>
+            <p class="text-parchment-200 font-serif text-sm">Gothic Horror meets Ecclesiastical Thriller and Paranormal Romance.</p>
+        </div>
+        <div class="bg-archive-card border border-archive-border p-5 rounded-sm space-y-2">
+            <span class="text-blood-500 font-bold uppercase">TARGET DEMOGRAPHIC</span>
+            <p class="text-parchment-200 font-serif text-sm">18–34 Dark Academia, Supernatural, and Visual Novel audiences.</p>
+        </div>
+        <div class="bg-archive-card border border-archive-border p-5 rounded-sm space-y-2">
+            <span class="text-blood-500 font-bold uppercase">CORE SELLING POINT</span>
+            <p class="text-parchment-200 font-serif text-sm">Rich lore, interactive digital companion site, and high-engagement character arcs.</p>
+        </div>
+    </div>
+
+    <!-- Season Breakdown Grid -->
+    <div class="space-y-4">
+        <h2 class="text-2xl font-gothic text-parchment-100 uppercase tracking-wider border-b border-blood-900/60 pb-2">Character Arc Trajectory: Damian Boudreaux</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for season in seasons %}
+            <div class="bg-archive-card border border-blood-900/80 p-6 rounded-sm space-y-3 relative overflow-hidden">
+                <div class="text-xs font-mono text-blood-500 font-bold uppercase tracking-widest">{{ season.number }}</div>
+                <h3 class="text-lg font-gothic text-parchment-100 font-bold uppercase">{{ season.subtitle }}</h3>
+                <div class="text-xs font-mono text-amber-500/90 font-semibold">[ {{ season.role }} ]</div>
+                <p class="text-xs font-serif text-parchment-300 leading-relaxed">{{ season.focus }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
