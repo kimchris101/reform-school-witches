@@ -1,0 +1,36 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-archive-bg/90 backdrop-blur-md"
+     id="cutscene-modal"
+     onclick="if(event.target === this) { const v = document.getElementById('cutscene-player'); if(v) v.pause(); this.remove(); }">
+
+    <div class="bg-archive-card border-2 border-blood-800 max-w-3xl w-full rounded-sm shadow-[0_0_50px_rgba(163,15,46,0.4)] relative font-mono overflow-hidden animate-fade-in">
+        
+        <!-- Bar -->
+        <div class="bg-archive-bg border-b border-blood-900/80 p-3 flex justify-between items-center text-xs">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-blood-600 animate-pulse"></span>
+                <span class="text-blood-500 font-bold uppercase tracking-widest">[ {{ scene.classification }} ]</span>
+            </div>
+            <button onclick="const v = document.getElementById('cutscene-player'); if(v) v.pause(); document.getElementById('cutscene-modal').remove()" 
+                    class="text-parchment-300 hover:text-blood-500 text-lg font-bold">
+                ✕
+            </button>
+        </div>
+
+        <!-- Video Player -->
+        <div class="relative bg-black aspect-video flex items-center justify-center">
+            <video id="cutscene-player" 
+                   autoplay 
+                   controls 
+                   class="w-full h-full object-contain">
+                <source src="{{ scene.video_url }}" type="video/mp4">
+                Your terminal viewport does not support HTML5 video playback.
+            </video>
+        </div>
+
+        <!-- Metadata Footer -->
+        <div class="p-4 bg-archive-card border-t border-archive-border space-y-1">
+            <h3 class="font-gothic text-base text-parchment-100 uppercase font-bold tracking-wider">{{ scene.title }}</h3>
+            <p class="font-serif text-xs text-parchment-300 italic">{{ scene.description }}</p>
+        </div>
+    </div>
+</div>
