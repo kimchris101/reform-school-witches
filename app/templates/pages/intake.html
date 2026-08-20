@@ -168,4 +168,10 @@
         </form>
     </div>
 </div>
+<!-- HTMX Event Listener for Cutscene Trigger -->
+<script>
+  document.body.addEventListener("launchCoLinkCutscene", function() {
+    htmx.ajax('GET', '/media/cutscene/sacramental-bond', { target: 'body', swap: 'beforeend' });
+  });
+</script>
 {% endblock %}

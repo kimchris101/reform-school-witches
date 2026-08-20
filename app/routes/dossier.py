@@ -120,8 +120,10 @@ async def render_dossiers_page(request: Request):
     )
 
 @router.get("/easter-egg/cyprian", response_class=HTMLResponse)
-async def get_cyprian_dossier(request: Request):
-    """Returns the secret redacted St. Cyprian Archdiocesan document fragment."""
+async def get_cyprian_dossier(request: Request, response: Response):
+    """Returns secret St. Cyprian fragment and launches the Library Awakening cutscene."""
+    response.headers["HX-Trigger-After-Swap"] = "launchCyprianCutscene"
+    
     return templates.TemplateResponse(
         request=request,
         name="components/cyprian_dossier.html",

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, Form, HTTPException, status
+from fastapi import APIRouter, Request, Form, HTTPException, status, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 
-from app.models.schemas import QuizSubmission, QuizAnswer
+from app.models.schemas import QuizSubmission, QuizAnswer, ArchetypeEnum
 from app.services.scoring import evaluate_intake_exam
 
 router = APIRouter()
@@ -24,6 +24,7 @@ async def render_intake_page(request: Request):
 @router.post("/evaluate", response_class=HTMLResponse)
 async def evaluate_intake_submission(
     request: Request,
+    response: Response,
     user_email: str = Form(...),
     user_alias: str = Form(...),
     q1: str = Form(...),
@@ -55,6 +56,10 @@ async def evaluate_intake_submission(
 
     # Calculate result & generate letter payload
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
+
+    # Trigger Sacramental Bond cutscene automatically if the user scores as The Co-Link Partner
+    if result.archetype in (ArchetypeEnum.CO_LINK_PARTNER, "The Co-Link Partner"):
+        response.headers["HX-Trigger-After-Swap"] = "launchCoLinkCutscene"
 
     # Return HTML fragment for HTMX swapping
     return templates.TemplateResponse(

@@ -94,3 +94,9 @@
         </div>
     </div>
 </div>
+<!-- Listener for St. Cyprian Lore Decryption Cutscene -->
+<script>
+  document.body.addEventListener("launchCyprianCutscene", function() {
+    htmx.ajax('GET', '/media/cutscene/library-awakening', { target: 'body', swap: 'beforeend' });
+  });
+</script>
