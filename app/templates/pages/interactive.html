@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto py-10 px-4 sm:px-6">
+<div class="max-w-6xl mx-auto py-10 px-4 sm:px-6 space-y-6">
     <!-- Header -->
     <header class="text-center mb-8 border-b border-blood-900/60 pb-6">
         <p class="text-xs font-mono uppercase tracking-[0.3em] text-blood-500 font-bold mb-2">THE REFORM SCHOOL FOR WITCHES — INTERACTIVE ENGINE</p>
         <h1 class="text-3xl md:text-4xl font-gothic text-parchment-100 tracking-wider uppercase font-bold">The Academy Gateway Choices</h1>
+        <p class="text-xs font-serif italic text-parchment-300 mt-2">Navigate canonical decisions and shape your spiritual alignment in real time.</p>
     </header>
 
     <!-- Visual Novel Stage Container -->
-    {% include "components/script_node.html" %}
+    {% include "components/story_node.html" %}
 </div>
 {% endblock %}
