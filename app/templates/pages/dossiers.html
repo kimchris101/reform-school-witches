@@ -21,4 +21,32 @@
     <!-- Dynamic Modal Target Container for HTMX -->
     <div id="dossier-modal-container"></div>
 </div>
+<!-- Subscriber Registration Modal -->
+<div id="register-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-archive-bg/85 backdrop-blur-md">
+    <div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 max-w-md w-full p-6 md:p-8 rounded-sm shadow-2xl relative font-serif">
+        <button onclick="document.getElementById('register-modal').classList.add('hidden')" class="absolute top-4 right-4 text-archive-bg font-mono font-bold text-xl">✕</button>
+
+        <div id="registration-form-container">
+            <p class="text-xs font-mono uppercase tracking-widest text-blood-900 font-bold mb-1">Diocesan Access Portal</p>
+            <h2 class="text-2xl font-gothic text-archive-bg font-bold uppercase tracking-wider mb-2">Subscriber Registration</h2>
+            <p class="text-xs text-archive-bg/80 font-serif mb-6 leading-relaxed">
+                Register as an official reader to unlock secret character files, cinematic cutscenes, and free PDF downloads.
+            </p>
+
+            <form hx-post="/vault/register" hx-target="#registration-form-container" hx-swap="innerHTML" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block text-blood-900 font-bold uppercase mb-1">Code Name / Alias *</label>
+                    <input type="text" name="alias" required placeholder="Initiate Claire" class="w-full bg-archive-bg text-parchment-100 px-3 py-2 border border-blood-900 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-blood-900 font-bold uppercase mb-1">Email Registry *</label>
+                    <input type="email" name="email" required placeholder="initiate@diocesan.org" class="w-full bg-archive-bg text-parchment-100 px-3 py-2 border border-blood-900 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic py-3 uppercase tracking-widest font-bold mt-2 transition-colors">
+                    ✝ Unlock Subscriber Access
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -120,7 +120,16 @@ async def render_dossiers_page(request: Request):
 
 @router.get("/easter-egg/cyprian", response_class=HTMLResponse)
 async def get_cyprian_dossier(request: Request):
-    """Returns the decrypted St. Cyprian file and triggers the video popup."""
+    """Returns the secret St. Cyprian file for subscribers or prompts registration for guests."""
+    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+
+    if not is_authenticated:
+        return templates.TemplateResponse(
+            request=request,
+            name="components/cyprian_locked.html",
+            context={}
+        )
+
     resp = templates.TemplateResponse(
         request=request,
         name="components/cyprian_dossier.html",
