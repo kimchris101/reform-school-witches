@@ -34,6 +34,44 @@
         {% endif %}
     </div>
 
+    <!-- EXECUTIVE PRODUCER TERMINAL (GATED INDUSTRY ACCESS) -->
+    <div class="mb-10 bg-archive-card border border-amber-900/70 p-6 rounded-sm space-y-4 relative overflow-hidden">
+        <div class="flex justify-between items-center text-xs font-mono">
+            <span class="text-amber-500 font-bold uppercase tracking-widest">[ EXECUTIVE TERMINAL ]</span>
+            <span class="text-amber-500/80 font-bold">CONFIDENTIAL</span>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-6 items-center">
+            <div class="md:col-span-2 space-y-2">
+                <h2 class="text-xl font-gothic text-parchment-100 uppercase tracking-wider font-bold">Industry & Production Pitch Deck</h2>
+                <p class="text-xs font-serif text-parchment-300 leading-relaxed">
+                    Access executive pitch materials, market demographic metrics, and Damian Boudreaux’s 3-season character transformation trajectory.
+                </p>
+            </div>
+
+            <!-- Passkey Form -->
+            <div>
+                <form hx-post="/industry/verify" 
+                      hx-target="#passkey-error" 
+                      hx-swap="outerHTML" 
+                      class="space-y-2">
+                    <div class="flex gap-2">
+                        <input type="password" 
+                               name="passkey" 
+                               placeholder="PRODUCER CODE" 
+                               required 
+                               class="bg-archive-bg border border-amber-900/80 text-amber-200 placeholder-amber-800 text-xs font-mono uppercase px-3 py-2 rounded-sm focus:outline-none focus:border-amber-500 w-full" />
+                        <button type="submit" 
+                                class="bg-amber-950/80 hover:bg-amber-900 text-amber-200 border border-amber-800 text-xs font-mono uppercase px-4 py-2 rounded-sm transition-colors whitespace-nowrap font-bold">
+                            Unlock 🔓
+                        </button>
+                    </div>
+                    <div id="passkey-error"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Cinematics Grid -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for scene in cutscenes %}
