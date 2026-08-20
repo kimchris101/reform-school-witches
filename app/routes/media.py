@@ -45,7 +45,7 @@ CUTSCENE_DB = {
         "subtitle": "Trapped inside a nightmare.",
         "video_url": "/static/media/cutscenes/masquerade_shatter.mp4",
         "classification": "Dream Sequence Feed",
-        "description": "Inside Roman's nightmare, watching from the balcony during the masquerade, He grips his champagne flute until the glass shatters."
+        "description": "Inside Roman's nightmare. Taunted by Amira, Roman watches Kimbra & Damian from the balcony, He grips his champagne flute until the glass shatters."
     }
 }
 
