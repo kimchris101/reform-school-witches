@@ -8,9 +8,9 @@ load_dotenv()
 logger = logging.getLogger("uvicorn.error")
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "admin@anomik.io")
-SENDER_NAME = os.getenv("SENDER_NAME", "Our Lady of Tears Academy")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip().strip('"').strip("'")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "hello@rsfwseries.com").strip()
+SENDER_NAME = os.getenv("SENDER_NAME", "Our Lady of Tears Academy").strip()
 
 
 async def send_diocesan_assessment_email(
@@ -19,9 +19,8 @@ async def send_diocesan_assessment_email(
     archetype_title: str,
     letter_body_html: str
 ) -> bool:
-    """Dispatches the official Diocesan Assessment Letter to an initiate via Brevo REST API."""
     if not BREVO_API_KEY:
-        logger.warning("BREVO_API_KEY is missing. Email dispatch skipped.")
+        logger.error("BREVO_API_KEY is missing. Skipping email dispatch.")
         return False
 
     headers = {
