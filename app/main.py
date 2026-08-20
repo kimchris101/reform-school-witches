@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import Response
 
-from app.routes import intake, dossier, media, interactive, vault
+from app.routes import intake, dossier, media, interactive, vault, industry
 
 app = FastAPI(
     title="The Reform School for Witches Series - Reader Portal API",
@@ -38,6 +38,7 @@ app.include_router(dossier.router, prefix="/dossiers", tags=["Character Dossiers
 app.include_router(media.router, prefix="/media", tags=["Cinematic Unlocks"])
 app.include_router(interactive.router, prefix="/interactive", tags=["Interactive Script Engine"])
 app.include_router(vault.router, prefix="/vault", tags=["Book Vault"])
+app.include_router(industry.router, prefix="/industry", tags=["Industry Pitch"])
 
 
 @app.get("/", include_in_schema=False)

@@ -1,0 +1,25 @@
+<div id="story-viewport" class="bg-archive-card border-2 border-blood-900 rounded-sm p-6 space-y-6 font-serif animate-fade-in">
+    <div class="flex justify-between items-center border-b border-blood-900/60 pb-3 font-mono text-xs">
+        <span class="text-blood-500 font-bold uppercase tracking-widest">[ {{ node.title }} ]</span>
+        <span class="text-parchment-300">SPEAKER: <strong class="text-parchment-100">{{ node.speaker }}</strong></span>
+    </div>
+
+    <div class="bg-archive-bg/90 p-5 border-l-4 border-blood-800 text-parchment-100 text-sm md:text-base leading-relaxed italic">
+        "{{ node.dialogue }}"
+    </div>
+
+    <div class="space-y-3 font-mono text-xs">
+        <p class="text-blood-500 uppercase tracking-widest font-bold">Choose Your Action:</p>
+        {% for choice in node.choices %}
+        <button hx-post="/interactive/choice"
+                hx-target="#story-viewport"
+                hx-swap="outerHTML"
+                name="next_node"
+                value="{{ choice.next_node }}"
+                class="w-full text-left bg-archive-bg hover:bg-blood-950/80 border border-blood-900 text-parchment-200 hover:text-parchment-100 px-4 py-3 rounded-sm transition-colors flex items-center justify-between">
+            <span>✝ {{ choice.text }}</span>
+            <span class="text-blood-500">→</span>
+        </button>
+        {% endfor %}
+    </div>
+</div>
