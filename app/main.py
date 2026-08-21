@@ -1,11 +1,13 @@
 import os
+from dotenv import load_dotenv
+
+# MUST be executed before importing app.routes modules
+load_dotenv()
+
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import Response
-from dotenv import load_dotenv
-load_dotenv()
 
 from app.routes import intake, dossier, media, interactive, vault, industry
 
