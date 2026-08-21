@@ -45,14 +45,14 @@ SYSTEM_PROMPTS = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
-    """Renders visual novel engine and initializes global root cookies."""
+    """Renders visual novel engine and initializes global root cookies capped between 0 and 100."""
     try:
-        sanctity = int(request.cookies.get("sanctity", 0))
+        sanctity = min(100, max(0, int(request.cookies.get("sanctity", 0))))
     except (ValueError, TypeError):
         sanctity = 0
 
     try:
-        corruption = int(request.cookies.get("corruption", 0))
+        corruption = min(100, max(0, int(request.cookies.get("corruption", 0))))
     except (ValueError, TypeError):
         corruption = 0
 
@@ -83,10 +83,10 @@ async def process_story_choice(
     next_node: Optional[str] = Form(None),
     choice_id: Optional[str] = Form(None)
 ):
-    """Processes story choices by reading the actual client cookies and applying deltas."""
+    """Processes story choices, applies positive/negative deltas, and clamps scores between 0% and 100%."""
     target_node_id = next_node_id or next_node or "node_001"
     
-    # 1. ALWAYS read existing running scores directly from cookies
+    # 1. Read existing running scores directly from cookies
     try:
         current_sanctity = int(request.cookies.get("sanctity", 0))
     except (ValueError, TypeError):
@@ -106,7 +106,7 @@ async def process_story_choice(
             status_code=404
         )
     
-    # 3. Locate the choice across nodes and extract exact score additions
+    # 3. Locate choice in SCRIPT_NODES to extract score deltas (positive or negative)
     delta_s = 0
     delta_c = 0
     found = False
@@ -122,11 +122,11 @@ async def process_story_choice(
             if found:
                 break
 
-    # 4. Compute new running totals
-    new_sanctity = max(0, current_sanctity + delta_s)
-    new_corruption = max(0, current_corruption + delta_c)
+    # 4. Apply deltas and strictly cap scores between 0% and 100%
+    new_sanctity = min(100, max(0, current_sanctity + delta_s))
+    new_corruption = min(100, max(0, current_corruption + delta_c))
     
-    # 5. Render updated component
+    # 5. Render updated story component
     template_res = templates.TemplateResponse(
         request=request,
         name="components/story_node.html",
