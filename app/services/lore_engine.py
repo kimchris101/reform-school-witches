@@ -1,15 +1,14 @@
 import os
+import re
 from pathlib import Path
 from typing import List
 from pypdf import PdfReader
 
-# Track parsed PDF chunks in memory
 PDF_TEXT_CHUNKS: List[str] = []
-
 PDF_PATH = Path("app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf")
 
 def initialize_pdf_lore_index():
-    """Reads the PDF from app/static/downloads and slices it into readable search chunks."""
+    """Reads the PDF from app/static/downloads and slices it into compact search chunks."""
     global PDF_TEXT_CHUNKS
     
     if not PDF_PATH.exists():
@@ -24,11 +23,27 @@ def initialize_pdf_lore_index():
             if text:
                 full_text.append(text)
                 
-        # Combine pages and split into ~500-character searchable paragraphs
         combined_text = "\n".join(full_text)
-        paragraphs = combined_text.split("\n\n")
-        PDF_TEXT_CHUNKS = [p.strip() for p in paragraphs if len(p.strip()) > 50]
-        print(f"[ LORE ENGINE SUCCESS ] Loaded {len(PDF_TEXT_CHUNKS)} canonical manuscript chunks from {PDF_PATH.name}.")
+        
+        # Clean extra whitespace and split into smaller paragraphs
+        cleaned_text = re.sub(r'\s+', ' ', combined_text)
+        sentences = re.split(r'(?<=[.!?]) +', cleaned_text)
+        
+        # Group sentences into compact chunks (~300 characters max)
+        chunks = []
+        current_chunk = ""
+        for sentence in sentences:
+            if len(current_chunk) + len(sentence) < 300:
+                current_chunk += " " + sentence
+            else:
+                if len(current_chunk.strip()) > 40:
+                    chunks.append(current_chunk.strip())
+                current_chunk = sentence
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+
+        PDF_TEXT_CHUNKS = chunks
+        print(f"[ LORE ENGINE SUCCESS ] Loaded {len(PDF_TEXT_CHUNKS)} compact manuscript chunks from {PDF_PATH.name}.")
     except Exception as e:
         print(f"[ LORE ENGINE ERROR ] Failed to parse PDF: {e}")
 
@@ -36,25 +51,30 @@ def initialize_pdf_lore_index():
 initialize_pdf_lore_index()
 
 def retrieve_lore_context(query: str) -> str:
-    """Scans parsed manuscript PDF chunks for matching keywords from the user's transmission."""
+    """Scans manuscript chunks for matching keywords and returns a strict character-limited context."""
     if not PDF_TEXT_CHUNKS:
         return "No manuscript PDF loaded."
 
-    query_words = [w.lower() for w in query.split() if len(w) > 3]
+    # Filter out common stop words to improve keyword precision
+    stop_words = {"who", "what", "where", "is", "are", "the", "a", "an", "and", "or", "about", "tell", "me"}
+    query_words = [w.lower() for w in re.findall(r'\w+', query) if w.lower() not in stop_words]
+
     if not query_words:
         query_words = [query.lower()]
 
     matched_chunks = []
     
-    # Scan manuscript PDF chunks for keyword matches
+    # Match up to 2 small paragraphs
     for chunk in PDF_TEXT_CHUNKS:
         chunk_lower = chunk.lower()
         if any(word in chunk_lower for word in query_words):
             matched_chunks.append(chunk)
-            if len(matched_chunks) >= 3:  # Limit context window to 3 relevant paragraphs
+            if len(matched_chunks) >= 2:
                 break
 
     if not matched_chunks:
         return "No specific manuscript lore matched; rely strictly on core character system prompt."
 
-    return "\n---\n".join(matched_chunks)
+    # Hard cap the total context length to 1,000 characters (~200 tokens)
+    joined_context = "\n---\n".join(matched_chunks)
+    return joined_context[:1000]
