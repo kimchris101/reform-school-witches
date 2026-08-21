@@ -81,20 +81,25 @@ async def process_story_choice(
     response: Response,
     next_node_id: Optional[str] = Form(None),
     next_node: Optional[str] = Form(None),
-    choice_id: Optional[str] = Form(None)
+    choice_id: Optional[str] = Form(None),
+    current_sanctity: int = Form(0),
+    current_corruption: int = Form(0)
 ):
-    """Processes choices, computes score deltas, and sets explicit global path cookies."""
+    """Processes story choices, accumulates score deltas, and saves global cookies."""
     target_node_id = next_node_id or next_node or "node_001"
     
-    try:
-        current_sanctity = int(request.cookies.get("sanctity", 0))
-    except (ValueError, TypeError):
-        current_sanctity = 0
+    # Fallback to reading cookies if form parameter is 0
+    if current_sanctity == 0:
+        try:
+            current_sanctity = int(request.cookies.get("sanctity", 0))
+        except (ValueError, TypeError):
+            current_sanctity = 0
 
-    try:
-        current_corruption = int(request.cookies.get("corruption", 0))
-    except (ValueError, TypeError):
-        current_corruption = 0
+    if current_corruption == 0:
+        try:
+            current_corruption = int(request.cookies.get("corruption", 0))
+        except (ValueError, TypeError):
+            current_corruption = 0
 
     node = get_script_node(target_node_id) or get_script_node("node_001")
     
@@ -106,7 +111,7 @@ async def process_story_choice(
     
     delta_s = 0
     delta_c = 0
-    if choice_id and node.choices:
+    if node.choices:
         for choice in node.choices:
             if choice.id == choice_id or choice.next_node_id == target_node_id:
                 delta_s = choice.sanctity_delta
