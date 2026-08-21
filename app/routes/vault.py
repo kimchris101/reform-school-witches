@@ -36,8 +36,8 @@ BOOKS_DB = [
         "is_released": False,
         "release_status": "Archival Seal Locked",
         "required_type": "sanctity",
-        "required_score": 100,  # REQUIRES FULL 100% SANCTITY TO REWARD ACCESS
-        "unlock_perk": "Decrypted Chapter 1 Preview (100% Sanctity Consecration Reached)"
+        "required_score": 100,  # REQUIRES STRICTLY 100% SANCTITY TO UNLOCK
+        "unlock_perk": "Decrypted Chapter 1 Preview (100% Sanctity Reached)"
     },
     {
         "id": "book-3",
@@ -51,9 +51,9 @@ BOOKS_DB = [
         "is_members_only": True,
         "is_released": False,
         "release_status": "In Archival Preparation",
-        "required_type": "corruption",
-        "required_score": 100,  # REQUIRES FULL 100% CORRUPTION TO REWARD ACCESS
-        "unlock_perk": "Classified Sanguine Audit Ledger (100% Corruption Reached)"
+        "required_type": "sanctity",  # ALSO REQUIRES 100% SANCTITY (CORRUPTION UNLOCKS NOTHING)
+        "required_score": 100,
+        "unlock_perk": "Classified Sanguine Audit Ledger (100% Sanctity Reached)"
     }
 ]
 
@@ -61,6 +61,7 @@ BOOKS_DB = [
 async def render_vault_page(request: Request):
     is_authenticated = request.cookies.get("rsfw_member_token") is not None
     
+    # Safely read user cookies
     try:
         sanctity = min(100, max(0, int(request.cookies.get("sanctity", 0))))
     except (ValueError, TypeError):
@@ -75,18 +76,24 @@ async def render_vault_page(request: Request):
     for book in BOOKS_DB:
         book_data = book.copy()
         
+        # Only Sanctity drives progress and rewards
         if book["required_type"] == "sanctity":
-            score = sanctity
-        elif book["required_type"] == "corruption":
-            score = corruption
+            current_score = sanctity
         else:
-            score = 100
+            current_score = 0
 
-        book_data["affinity_score"] = score
-        # Strict 100% reward condition check
-        book_data["is_clearance_unlocked"] = score >= book["required_score"] if book["required_score"] > 0 else True
-        book_data["clearance_progress"] = min(100, int((score / book["required_score"]) * 100)) if book["required_score"] > 0 else 100
+        req_score = book["required_score"]
         
+        if req_score > 0:
+            book_data["affinity_score"] = current_score
+            book_data["clearance_progress"] = min(100, int((current_score / req_score) * 100))
+            # Unlock reward ONLY when Sanctity reaches 100%
+            book_data["is_clearance_unlocked"] = current_score >= req_score
+        else:
+            book_data["affinity_score"] = 0
+            book_data["clearance_progress"] = 100
+            book_data["is_clearance_unlocked"] = True
+
         processed_books.append(book_data)
 
     return templates.TemplateResponse(
