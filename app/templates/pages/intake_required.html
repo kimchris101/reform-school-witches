@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-16 px-4 text-center font-serif space-y-6">
+    <div class="bg-archive-card border-2 border-blood-900 p-8 sm:p-12 rounded-sm shadow-2xl space-y-6 relative overflow-hidden">
+        
+        <div class="font-mono text-xs text-blood-500 uppercase tracking-[0.3em] font-bold flex items-center justify-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-blood-600 animate-ping"></span>
+            [ ARCHDIOCESE SECURITY PROTOCOL :: CLEARANCE RESTRICTED ]
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-gothic text-parchment-100 uppercase tracking-wider font-bold">
+            Intake Exam Required
+        </h1>
+
+        <p class="text-sm sm:text-base text-parchment-300 leading-relaxed italic">
+            Access to the Interactive Script Engine is restricted to authenticated initiates of Our Lady of Tears Academy. You must complete the Intake Exam and register your email to unlock script telemetry.
+        </p>
+
+        <div class="pt-6">
+            <a href="/intake" 
+               class="inline-block bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-sm border border-blood-600 shadow-xl transition-all hover:scale-105">
+                ✝ Begin Intake Exam & Unlock Engine
+            </a>
+        </div>
+
+        <p class="text-[10px] font-mono text-archive-muted uppercase tracking-widest">
+            Diocesan Registry Token Required // Path: /interactive/
+        </p>
+    </div>
+</div>
+{% endblock %}
