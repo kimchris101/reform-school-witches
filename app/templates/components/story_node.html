@@ -31,6 +31,10 @@
         <form hx-post="/interactive/choice" hx-target="#story-viewport" hx-swap="outerHTML">
             <input type="hidden" name="next_node_id" value="{{ choice.next_node_id }}">
             <input type="hidden" name="choice_id" value="{{ choice.id }}">
+            <!-- CRITICAL FIX: Pass current running state in form payload -->
+            <input type="hidden" name="current_sanctity" value="{{ sanctity or 0 }}">
+            <input type="hidden" name="current_corruption" value="{{ corruption or 0 }}">
+            
             <button type="submit"
                     class="w-full text-left bg-black/85 hover:bg-blood-950/90 border border-blood-900/80 text-parchment-200 hover:text-parchment-100 px-4 py-3 rounded-sm transition-colors flex items-center justify-between group backdrop-blur-md shadow-lg">
                 <span>✝ {{ choice.text }}</span>
