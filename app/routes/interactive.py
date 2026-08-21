@@ -170,7 +170,7 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "llama3-70b-8192",
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [
                         {"role": "system", "content": augmented_system_prompt},
                         {"role": "user", "content": message}
