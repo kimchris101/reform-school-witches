@@ -1,65 +1,60 @@
-from typing import List, Dict
+import os
+from pathlib import Path
+from typing import List
+from pypdf import PdfReader
 
-# Canonical Lore Registry extracted from The Blood Lily Contract
-LORE_REGISTRY: List[Dict[str, str]] = [
-    {
-        "topic": "sanguine_tether",
-        "keywords": "tether, link, wire, siphoning, hearth, graft, droit de greffe",
-        "canon_context": (
-            "The Sanguine Tether is a 300-year-old parasitic link created by the Boudreaux family. "
-            "A designated Hearth (biological battery, such as Kimbra Woods) is branded with a Blood Lily iron mark. "
-            "This allows the heir (Damian) to siphon her life-force to sustain his defective physical body and extend their dynasty."
-        )
-    },
-    {
-        "topic": "emergency_baptism",
-        "keywords": "baptism, water, seal, chrism, confirmed, mary, renunciation",
-        "canon_context": (
-            "Father Manuel performed an emergency Baptism on Kimberly Woods in the White Room while Roman grounded the static. "
-            "By renouncing Satan, the Crimson Root, and Damian Boudreaux, her un-owned status was overwritten. "
-            "The Baptism severed the Sanguine Tether, transforming her scar into sterling silver and rendering her an official Citizen of the Kingdom."
-        )
-    },
-    {
-        "topic": "one_soul_colink",
-        "keywords": "co-link, colink, one soul, shield, chalice, sponsor, ground, eucharist",
-        "canon_context": (
-            "The Doctrine of the One Soul dictates that a Shield (Roman) and a Chalice (Kimbra/Mary) form a sacramental circuit. "
-            "The Shield acts as an anvil/ground to absorb supernatural feedback, while the Chalice projects the divine Presence fed by the Eucharist. "
-            "When two become one in Christ's Name, they restore order rather than scramble the air."
-        )
-    },
-    {
-        "topic": "our_lady_of_tears",
-        "keywords": "academy, tears, crown of tears, salt, sanctuary lamp, north tower, exceptions",
-        "canon_context": (
-            "Our Lady of Tears Academy is a fortress of salt and stone in Louisiana established in 1833. "
-            "It trains Exceptions—souls burdened by demonic afflictions—as holy soldiers. "
-            "Defenses rely on consecrated salt lines, moat brine, the Crown of Tears Rosary (49 white beads), and Perpetual Adoration."
-        )
-    },
-    {
-        "topic": "crimson_root",
-        "keywords": "root, vincent, boudreaux, ledger, debt, livre de la racine, proxy",
-        "canon_context": (
-            "The Crimson Root is the occult system governed by Vincent Boudreaux using the Livre de la Racine (Ledger of Debts). "
-            "It operates under the Petit Catéchisme, treating unsealed human souls as biological assets. "
-            "When Kimbra's tether snapped, Vincent used a secondary Proxy girl to temporarily supply Damian with stolen vitality."
-        )
-    }
-]
+# Track parsed PDF chunks in memory
+PDF_TEXT_CHUNKS: List[str] = []
+
+PDF_PATH = Path("app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf")
+
+def initialize_pdf_lore_index():
+    """Reads the PDF from app/static/downloads and slices it into readable search chunks."""
+    global PDF_TEXT_CHUNKS
+    
+    if not PDF_PATH.exists():
+        print(f"[ LORE ENGINE ] PDF not found at {PDF_PATH}. Falling back to default registry.")
+        return
+
+    try:
+        reader = PdfReader(str(PDF_PATH))
+        full_text = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                full_text.append(text)
+                
+        # Combine pages and split into ~500-character searchable paragraphs
+        combined_text = "\n".join(full_text)
+        paragraphs = combined_text.split("\n\n")
+        PDF_TEXT_CHUNKS = [p.strip() for p in paragraphs if len(p.strip()) > 50]
+        print(f"[ LORE ENGINE SUCCESS ] Loaded {len(PDF_TEXT_CHUNKS)} canonical manuscript chunks from {PDF_PATH.name}.")
+    except Exception as e:
+        print(f"[ LORE ENGINE ERROR ] Failed to parse PDF: {e}")
+
+# Run PDF ingestion at startup
+initialize_pdf_lore_index()
 
 def retrieve_lore_context(query: str) -> str:
-    """Searches canonical lore registry for matching topics based on query keywords."""
-    query_lower = query.lower()
-    matched_contexts = []
+    """Scans parsed manuscript PDF chunks for matching keywords from the user's transmission."""
+    if not PDF_TEXT_CHUNKS:
+        return "No manuscript PDF loaded."
+
+    query_words = [w.lower() for w in query.split() if len(w) > 3]
+    if not query_words:
+        query_words = [query.lower()]
+
+    matched_chunks = []
     
-    for entry in LORE_REGISTRY:
-        keywords = [k.strip() for k in entry["keywords"].split(",")]
-        if any(keyword in query_lower for keyword in keywords):
-            matched_contexts.append(entry["canon_context"])
-            
-    if not matched_contexts:
+    # Scan manuscript PDF chunks for keyword matches
+    for chunk in PDF_TEXT_CHUNKS:
+        chunk_lower = chunk.lower()
+        if any(word in chunk_lower for word in query_words):
+            matched_chunks.append(chunk)
+            if len(matched_chunks) >= 3:  # Limit context window to 3 relevant paragraphs
+                break
+
+    if not matched_chunks:
         return "No specific manuscript lore matched; rely strictly on core character system prompt."
-        
-    return "\n\n".join(matched_contexts)
+
+    return "\n---\n".join(matched_chunks)
