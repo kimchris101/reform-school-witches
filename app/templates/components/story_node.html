@@ -1,10 +1,9 @@
-
 <div id="story-viewport" 
-     class="bg-archive-card border-2 border-blood-900 rounded-sm p-6 space-y-6 font-serif animate-fade-in bg-cover bg-center transition-all duration-500 relative overflow-hidden"
-     style="background-image: linear-gradient(to bottom, rgba(13, 10, 15, 0.88), rgba(13, 10, 15, 0.96)), url('{{ node.background_url }}');">
+     class="border-2 border-blood-900 rounded-sm p-6 space-y-6 font-serif animate-fade-in bg-cover bg-center transition-all duration-500 relative overflow-hidden shadow-2xl min-h-[480px]"
+     style="background-image: linear-gradient(to bottom, rgba(13, 10, 15, 0.25), rgba(13, 10, 15, 0.55)), url('{{ node.background_url }}');">
 
     <!-- Header with Metrics & Location -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-blood-900/60 pb-3 gap-2 font-mono text-xs relative z-10">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-blood-900/60 pb-3 gap-2 font-mono text-xs relative z-10 bg-black/70 p-2.5 rounded backdrop-blur-md shadow-md">
         <div class="flex items-center gap-3">
             <span class="text-blood-500 font-bold uppercase tracking-widest">[ {{ node.speaker_title or 'CLASSIFIED NODE' }} ]</span>
             <span class="text-archive-muted">|</span>
@@ -18,22 +17,22 @@
     <!-- Dialogue Box & Portrait -->
     <div class="flex flex-col md:flex-row gap-4 items-start relative z-10">
         {% if node.portrait_url %}
-        <img src="{{ node.portrait_url }}" alt="{{ node.speaker }}" class="w-20 h-28 rounded border border-blood-900/80 object-cover object-top shadow-lg shrink-0">
+        <img src="{{ node.portrait_url }}" alt="{{ node.speaker }}" class="w-20 h-28 rounded border border-blood-900/80 object-cover object-top shadow-xl shrink-0">
         {% endif %}
-        <div class="bg-archive-bg/90 p-5 border-l-4 border-blood-800 text-parchment-100 text-sm md:text-base leading-relaxed italic flex-1 backdrop-blur-sm">
+        <div class="bg-black/85 p-5 border-l-4 border-blood-800 text-parchment-100 text-sm md:text-base leading-relaxed italic flex-1 backdrop-blur-md rounded-r shadow-2xl">
             "{{ node.dialogue }}"
         </div>
     </div>
 
     <!-- Action Choices -->
     <div class="space-y-3 font-mono text-xs relative z-10">
-        <p class="text-blood-500 uppercase tracking-widest font-bold">Choose Your Action:</p>
+        <p class="text-blood-500 uppercase tracking-widest font-bold drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">Choose Your Action:</p>
         {% for choice in node.choices %}
         <form hx-post="/interactive/choice" hx-target="#story-viewport" hx-swap="outerHTML">
             <input type="hidden" name="next_node_id" value="{{ choice.next_node_id }}">
             <input type="hidden" name="choice_id" value="{{ choice.id }}">
             <button type="submit"
-                    class="w-full text-left bg-archive-bg/90 hover:bg-blood-950/90 border border-blood-900 text-parchment-200 hover:text-parchment-100 px-4 py-3 rounded-sm transition-colors flex items-center justify-between group backdrop-blur-sm">
+                    class="w-full text-left bg-black/85 hover:bg-blood-950/90 border border-blood-900/80 text-parchment-200 hover:text-parchment-100 px-4 py-3 rounded-sm transition-colors flex items-center justify-between group backdrop-blur-md shadow-lg">
                 <span>✝ {{ choice.text }}</span>
                 <span class="text-blood-500 group-hover:translate-x-1 transition-transform">
                     {% if choice.archetype_affinity %}
@@ -51,11 +50,10 @@
         <button hx-get="/interactive/chat-modal/{{ node.speaker|lower|replace(' ', '') }}" 
                 hx-target="#modal-container" 
                 hx-swap="innerHTML"
-                class="font-mono text-xs text-amber-400 hover:text-amber-300 border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 rounded uppercase tracking-widest transition-colors">
+                class="font-mono text-xs text-amber-400 hover:text-amber-300 border border-amber-500/40 bg-black/80 hover:bg-amber-500/20 px-3 py-1.5 rounded uppercase tracking-widest transition-colors backdrop-blur-md shadow-md">
             [ INTERROGATE {{ node.speaker|upper }} VIA TERMINAL ]
         </button>
     </div>
 </div>
 
 <div id="modal-container"></div>
-
