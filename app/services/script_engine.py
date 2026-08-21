@@ -35,7 +35,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c1",
                 text="Step across the salt barrier and invoke the Holy Name.",
                 next_node_id="node_002_salt",
-                sanctity_delta=15,
+                sanctity_delta=35,
                 corruption_delta=0,
                 archetype_affinity="The Sentinel Shield"
             ),
@@ -44,14 +44,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 text="Listen closely to the high-frequency hum calling from the swamp.",
                 next_node_id="node_002_listen",
                 sanctity_delta=0,
-                corruption_delta=15,
+                corruption_delta=35,
                 archetype_affinity="The Sanguine Initiate"
             ),
             ScriptChoice(
                 id="c3",
                 text="Reach for Roman's arm to lock Co-Link frequencies.",
                 next_node_id="node_002_colink",
-                sanctity_delta=10,
+                sanctity_delta=25,
                 corruption_delta=0,
                 archetype_affinity="The Co-Link Partner"
             )
@@ -73,14 +73,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c1_1",
                 text="Proceed directly to Father Manuel in the North Tower.",
                 next_node_id="node_003_manuel",
-                sanctity_delta=10,
+                sanctity_delta=35,
                 corruption_delta=0
             ),
             ScriptChoice(
                 id="c1_2",
                 text="Inspect the salt line perimeter with Ignatius first.",
                 next_node_id="node_003_sentry_patrol",
-                sanctity_delta=15,
+                sanctity_delta=30,
                 corruption_delta=0
             )
         ]
@@ -97,14 +97,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c_m1",
                 text="Kneel before the Eucharistic Altar and take the sacred Vow.",
                 next_node_id="node_004_sanctified_end",
-                sanctity_delta=20,
+                sanctity_delta=30,
                 corruption_delta=0
             ),
             ScriptChoice(
                 id="c_m2",
                 text="Ask Father Manuel about the true cost of Kimbra's Emergency Baptism.",
                 next_node_id="node_003_colink",
-                sanctity_delta=5,
+                sanctity_delta=15,
                 corruption_delta=0
             )
         ]
@@ -121,7 +121,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c_p1",
                 text="Strengthen the defensive salt line using the Crown of Tears Rosary.",
                 next_node_id="node_004_sanctified_end",
-                sanctity_delta=20,
+                sanctity_delta=35,
                 corruption_delta=0
             ),
             ScriptChoice(
@@ -150,14 +150,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 text="Accept the graft line and offer your vitality to the Boudreaux dynasty.",
                 next_node_id="node_003_damian_pact",
                 sanctity_delta=0,
-                corruption_delta=25
+                corruption_delta=35
             ),
             ScriptChoice(
                 id="c2_2",
                 text="Demand to see the Livre de la Racine ledger before making a choice.",
                 next_node_id="node_003_ledger",
                 sanctity_delta=0,
-                corruption_delta=15
+                corruption_delta=25
             )
         ]
     ),
@@ -190,15 +190,15 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c_g1",
                 text="Help Genesis scramble the Crimson Root signal.",
                 next_node_id="node_002_salt",
-                sanctity_delta=15,
-                corruption_delta=-10
+                sanctity_delta=30,
+                corruption_delta=0
             ),
             ScriptChoice(
                 id="c_g2",
                 text="Bypass Genesis and take the ledger for yourself.",
                 next_node_id="node_003_damian_pact",
                 sanctity_delta=0,
-                corruption_delta=20
+                corruption_delta=40
             )
         ]
     ),
@@ -218,14 +218,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c3_1",
                 text="Stand beside Kimbra in the sanctuary and ground the energy.",
                 next_node_id="node_003_manuel",
-                sanctity_delta=15,
+                sanctity_delta=40,
                 corruption_delta=0
             ),
             ScriptChoice(
                 id="c3_2",
                 text="Ask Kimbra how she severed her tether from Damian.",
                 next_node_id="node_003_kimbra_story",
-                sanctity_delta=10,
+                sanctity_delta=35,
                 corruption_delta=0
             )
         ]
@@ -242,7 +242,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
                 id="c_k1",
                 text="Reaffirm your devotion to protecting Kimbra and the Academy.",
                 next_node_id="node_004_sanctified_end",
-                sanctity_delta=20,
+                sanctity_delta=40,
                 corruption_delta=0
             )
         ]
