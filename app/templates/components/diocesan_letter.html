@@ -1,5 +1,5 @@
 <!-- Parchment Disciplinary Letter Container -->
-<div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 p-8 md:p-12 rounded-sm shadow-[0_0_40px_rgba(163,15,46,0.3)] max-w-3xl mx-auto my-6 font-serif relative overflow-hidden">
+<div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 p-8 md:p-12 rounded-sm shadow-[0_0_40px_rgba(163,15,46,0.3)] max-w-3xl mx-auto my-6 font-serif relative overflow-hidden animate-fade-in">
     <!-- Parchment Watermark / Seal Banner -->
     <div class="absolute top-0 right-0 -mt-6 -mr-6 w-36 h-36 border-4 border-blood-900/30 rounded-full flex items-center justify-center rotate-12 pointer-events-none">
         <span class="text-[9px] font-mono uppercase text-blood-900/60 text-center leading-tight font-bold">Diocesan Tribunal<br>Seal of Entry</span>
@@ -33,15 +33,27 @@
         </p>
     </div>
 
+    <!-- Authentication Clearance Notification -->
+    <div class="mt-6 bg-blood-900/10 border border-blood-900/40 p-4 text-center space-y-1 font-mono text-xs">
+        <span class="text-blood-900 font-bold uppercase tracking-wider block">
+            ✝ DIOCESAN CLEARANCE ISSUED
+        </span>
+        <p class="text-archive-bg/80 font-serif text-xs italic">
+            A copy of this seal has been dispatched to <strong>{{ user_email }}</strong>. Your email is now authenticated across all interactive channels.
+        </p>
+    </div>
+
     <!-- Actions / Next Steps -->
-    <div class="mt-8 pt-6 border-t border-blood-900/30 text-center space-y-4">
-        <p class="text-xs font-mono text-archive-bg/80">A copy of this seal has been dispatched to <strong>{{ user_email }}</strong>.</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-            <a href="/dossiers" class="bg-archive-bg hover:bg-archive-card text-parchment-100 font-gothic px-6 py-3 text-xs uppercase tracking-widest transition-colors font-bold border border-archive-border">
-                Inspect Character Dossiers
+    <div class="mt-6 pt-6 border-t border-blood-900/30 text-center space-y-4 font-mono text-xs">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/interactive" class="bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic px-6 py-3.5 text-xs uppercase tracking-widest transition-colors font-bold border border-blood-950 shadow-md">
+                ✝ Enter Interactive Engine
             </a>
-            <a href="/interactive" class="bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic px-6 py-3 text-xs uppercase tracking-widest transition-colors font-bold border border-blood-600">
-                Enter Script Engine
+            <a href="/vault" class="bg-archive-bg hover:bg-archive-card text-parchment-100 font-gothic px-6 py-3.5 text-xs uppercase tracking-widest transition-colors font-bold border border-archive-border shadow-md">
+                [ Access Vault Archives ]
+            </a>
+            <a href="/dossiers" class="bg-blood-900/20 hover:bg-blood-900/30 text-archive-bg font-gothic px-6 py-3.5 text-xs uppercase tracking-widest transition-colors font-bold border border-blood-900/40">
+                Inspect Dossiers
             </a>
         </div>
     </div>
