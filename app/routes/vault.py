@@ -1,6 +1,4 @@
 import os
-from typing import Optional
-from pydantic import BaseModel
 from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -8,7 +6,6 @@ from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# Series Book Database with Interactive Affinity Clearances
 BOOKS_DB = [
     {
         "id": "book-1",
@@ -63,14 +60,21 @@ BOOKS_DB = [
 @router.get("/", response_class=HTMLResponse)
 async def render_vault_page(request: Request):
     is_authenticated = request.cookies.get("rsfw_member_token") is not None
-    sanctity = int(request.cookies.get("sanctity", 0))
-    corruption = int(request.cookies.get("corruption", 0))
+    
+    try:
+        sanctity = int(request.cookies.get("sanctity", 0))
+    except (ValueError, TypeError):
+        sanctity = 0
+
+    try:
+        corruption = int(request.cookies.get("corruption", 0))
+    except (ValueError, TypeError):
+        corruption = 0
 
     processed_books = []
     for book in BOOKS_DB:
         book_data = book.copy()
         
-        # Evaluate interactive clearance state
         if book["required_type"] == "sanctity":
             score = sanctity
         elif book["required_type"] == "corruption":
@@ -79,7 +83,7 @@ async def render_vault_page(request: Request):
             score = 100
 
         book_data["affinity_score"] = score
-        book_data["is_clearance_unlocked"] = score >= book["required_score"]
+        book_data["is_clearance_unlocked"] = score >= book["required_score"] if book["required_score"] > 0 else True
         book_data["clearance_progress"] = min(100, int((score / book["required_score"]) * 100)) if book["required_score"] > 0 else 100
         
         processed_books.append(book_data)
@@ -112,7 +116,6 @@ async def download_book_pdf(request: Request, book_id: str):
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found.")
 
-    # Guard against downloading unreleased books
     if not book["is_released"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -142,5 +145,5 @@ async def register_member(request: Request):
         name="components/vault_access_granted.html",
         context={"user_alias": alias}
     )
-    response.set_cookie(key="rsfw_member_token", value=f"initiate_{email}", max_age=2592000)
+    response.set_cookie(key="rsfw_member_token", value=f"initiate_{email}", path="/", max_age=2592000)
     return response
