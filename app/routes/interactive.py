@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.models.script import get_script_node
+
+# Relative import pointing from app/routes/interactive.py -> app/services/script_engine.py
+from ..services.script_engine import get_script_node
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -63,7 +65,15 @@ async def process_story_choice(
     current_sanctity = int(request.cookies.get("sanctity", 0))
     current_corruption = int(request.cookies.get("corruption", 0))
     
+    # Fetch requested node or fallback safely to starting node
     node = get_script_node(next_node_id) or get_script_node("node_001")
+    
+    # Type-safety guard ensuring Pylance knows `node` is non-None
+    if not node:
+        return HTMLResponse(
+            content="<p class='text-blood-500 font-mono text-xs'>[ ERROR: SIGNAL LOSS :: NODE NOT FOUND ]</p>",
+            status_code=404
+        )
     
     delta_s = 0
     delta_c = 0
@@ -94,6 +104,7 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
     """Terminal chat endpoint generating in-character responses."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     
+    # AI response placeholder—ready to connect to your preferred LLM provider
     ai_response = f"[{character_id.upper()} RESONANCE]: The frequency holds. '{message}' has been recorded in the register."
     
     return templates.TemplateResponse(
