@@ -77,17 +77,17 @@
                 {% if book.required_type %}
                 <div class="bg-black/60 p-3 rounded border border-blood-900/60 space-y-2 font-mono text-[10px]">
                     <div class="flex justify-between items-center">
-                        <span class="text-amber-400 uppercase font-bold">RESONANCE MATCH ({{ book.required_type|upper }})</span>
+                        <span class="text-amber-400 uppercase font-bold">SACRAMENTAL CONSECRATION</span>
                         <span class="text-parchment-300">{{ book.clearance_progress }}%</span>
                     </div>
                     <div class="w-full bg-blood-950 h-1.5 rounded-full overflow-hidden border border-blood-900/60">
-                        <div class="bg-blood-500 h-full transition-all duration-500" style="width: {{ book.clearance_progress }}%;"></div>
+                        <div class="bg-amber-500 h-full transition-all duration-500" style="width: {{ book.clearance_progress }}%;"></div>
                     </div>
                     <p class="text-[9px] text-archive-muted italic">
                         {% if book.is_clearance_unlocked %}
                         <span class="text-emerald-400 font-bold">✓ {{ book.unlock_perk }}</span>
                         {% else %}
-                        <span>🔒 REQUIRES FULL 100% {{ book.required_type|upper }} CONSECRATION TO UNLOCK REWARD.</span>
+                        <span>🔒 REQUIRES 100% SANCTITY TO DECRYPT REWARD PREVIEW.</span>
                         {% endif %}
                     </p>
                 </div>
@@ -98,17 +98,17 @@
             <div class="pt-6 border-t border-archive-border font-mono text-xs mt-6">
                 {% if not book.is_released %}
                     {% if book.is_clearance_unlocked %}
-                    <!-- REWARD UNLOCKED STATE AT 100% -->
+                    <!-- REWARD UNLOCKED AT 100% SANCTITY -->
                     <a href="/static/downloads/{{ book.file_name }}" 
                        target="_blank"
                        class="w-full bg-emerald-800 hover:bg-emerald-700 text-parchment-100 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 border border-emerald-600 font-bold uppercase tracking-wider shadow-lg">
                         <span>🔓</span> ACCESS 100% REWARD PREVIEW
                     </a>
                     {% else %}
-                    <!-- UNRELEASED & LOCKED STATE -->
+                    <!-- LOCKED STATE (CORRUPTION / INSUFFICIENT SANCTITY) -->
                     <button disabled 
                             class="w-full bg-archive-bg/50 border border-blood-900/60 text-archive-muted font-gothic py-3 px-4 rounded-sm cursor-not-allowed flex justify-center items-center gap-2 uppercase tracking-wider font-bold">
-                        <span>🔒</span> Sealed Archival Record (Requires 100%)
+                        <span>🔒</span> Sealed Archival Record (Requires 100% Sanctity)
                     </button>
                     {% endif %}
                 {% elif is_authenticated %}
