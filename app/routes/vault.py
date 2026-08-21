@@ -36,8 +36,8 @@ BOOKS_DB = [
         "is_released": False,
         "release_status": "Archival Seal Locked",
         "required_type": "sanctity",
-        "required_score": 30,
-        "unlock_perk": "Decrypted Chapter 1 Preview (Sanctity Threshold Met)"
+        "required_score": 100,  # REQUIRES FULL 100% SANCTITY TO REWARD ACCESS
+        "unlock_perk": "Decrypted Chapter 1 Preview (100% Sanctity Consecration Reached)"
     },
     {
         "id": "book-3",
@@ -52,8 +52,8 @@ BOOKS_DB = [
         "is_released": False,
         "release_status": "In Archival Preparation",
         "required_type": "corruption",
-        "required_score": 50,
-        "unlock_perk": "Classified Sanguine Audit Ledger (Corruption Threshold Met)"
+        "required_score": 100,  # REQUIRES FULL 100% CORRUPTION TO REWARD ACCESS
+        "unlock_perk": "Classified Sanguine Audit Ledger (100% Corruption Reached)"
     }
 ]
 
@@ -62,12 +62,12 @@ async def render_vault_page(request: Request):
     is_authenticated = request.cookies.get("rsfw_member_token") is not None
     
     try:
-        sanctity = int(request.cookies.get("sanctity", 0))
+        sanctity = min(100, max(0, int(request.cookies.get("sanctity", 0))))
     except (ValueError, TypeError):
         sanctity = 0
 
     try:
-        corruption = int(request.cookies.get("corruption", 0))
+        corruption = min(100, max(0, int(request.cookies.get("corruption", 0))))
     except (ValueError, TypeError):
         corruption = 0
 
@@ -83,6 +83,7 @@ async def render_vault_page(request: Request):
             score = 100
 
         book_data["affinity_score"] = score
+        # Strict 100% reward condition check
         book_data["is_clearance_unlocked"] = score >= book["required_score"] if book["required_score"] > 0 else True
         book_data["clearance_progress"] = min(100, int((score / book["required_score"]) * 100)) if book["required_score"] > 0 else 100
         
