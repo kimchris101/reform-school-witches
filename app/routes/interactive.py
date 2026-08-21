@@ -1,3 +1,5 @@
+import os
+import httpx
 from typing import Optional
 from fastapi import APIRouter, Request, Form, Response
 from fastapi.responses import HTMLResponse
@@ -13,17 +15,21 @@ SYSTEM_PROMPTS = {
     "roman": (
         "You are Roman De La Croix, a Shield at Our Lady of Tears Academy. Speak in a disciplined, formal, Catholic Noir cadence. "
         "You carry the guilt of leaving a girl behind in New Orleans high society and your sacred oath as Kimbra's Sponsor. "
-        "Use terms like 'Co-link', 'Ground', 'Sacramental Seal', 'Sanctuary Lamp', and 'Sentry'. Never break character."
+        "You view the user through the lens of a sentry—watchful, grounded, and fiercely protective. "
+        "Use terms like 'Co-link', 'Ground', 'Sacramental Seal', 'Sanctuary Lamp', and 'Sentry'. "
+        "Keep responses atmospheric, immersive, and under 100 words. Never break character or mention being an AI."
     ),
     "damian": (
         "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root. You are starving without your Hearth. "
         "Your tone shifts between seductive longing for 'Kimmy' under the willow tree and predatory demands of the Sanguine Law. "
-        "Use terms like 'Hearth', 'Sanguine Tether', 'The Crimson Root', 'Debt', and 'Graft'."
+        "Use terms like 'Hearth', 'Sanguine Tether', 'The Crimson Root', 'Debt', and 'Graft'. "
+        "Keep responses possessive, feverish, and under 100 words. Never break character or mention being an AI."
     ),
     "manuel": (
-        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You speak with theological authority. "
-        "Evaluate spiritual conflict through Sacraments, Canon Law, and Latin Rites. "
-        "Use terms like 'Citizen of the Kingdom', 'Rite of Severance', 'One Soul', 'Eucharistic Ground', and 'Catechumen'."
+        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You speak with theological authority, "
+        "pastoral warmth, and tactical firmness. Evaluate all spiritual conflict through Sacraments, Canon Law, and Latin Rites. "
+        "Use terms like 'Citizen of the Kingdom', 'Rite of Severance', 'One Soul', 'Eucharistic Ground', and 'Catechumen'. "
+        "Keep responses authoritative, wise, and under 100 words. Never break character or mention being an AI."
     )
 }
 
@@ -128,17 +134,50 @@ async def render_chat_modal(request: Request, character_id: str):
 
 @router.post("/chat/{character_id}", response_class=HTMLResponse)
 async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
-    """Terminal chat endpoint that retrieves manuscript lore and returns response."""
+    """Live terminal chat endpoint using RAG lore retrieval and httpx HTTP completion to Groq API."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     
-    # Retrieve canonical lore from Book 1
+    # 1. Retrieve canonical manuscript context
     lore_context = retrieve_lore_context(message)
     
-    # Simulated response incorporating RAG context awareness
-    ai_response = (
-        f"[{character_id.upper()} RESONANCE]: Frequency aligned with Academy Archives. "
-        f"Regarding '{message}'—{lore_context}"
+    # 2. Build augmented prompt
+    augmented_system_prompt = (
+        f"{system_prompt}\n\n"
+        f"CANONICAL MANUSCRIPT REPOSITORY Context:\n"
+        f"{lore_context}"
     )
+    
+    groq_api_key = os.getenv("GROQ_API_KEY", "")
+    
+    # 3. Call Groq API via direct async HTTP request
+    try:
+        async with httpx.AsyncClient() as http_client:
+            response = await http_client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {groq_api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [
+                        {"role": "system", "content": augmented_system_prompt},
+                        {"role": "user", "content": message}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 200
+                },
+                timeout=10.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                ai_response = data["choices"][0]["message"]["content"]
+            else:
+                ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Status {response.status_code}. Verify GROQ_API_KEY environment variable."
+                
+    except Exception as e:
+        ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Frequency disruption. ({str(e)})"
     
     return templates.TemplateResponse(
         request=request,
