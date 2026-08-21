@@ -87,7 +87,7 @@
                         {% if book.is_clearance_unlocked %}
                         <span class="text-emerald-400 font-bold">✓ {{ book.unlock_perk }}</span>
                         {% else %}
-                        <span>🔒 Requires {{ book.required_score }}% {{ book.required_type|capitalize }} in Interactive Script to unlock early manuscript preview.</span>
+                        <span>🔒 REQUIRES FULL 100% {{ book.required_type|upper }} CONSECRATION TO UNLOCK REWARD.</span>
                         {% endif %}
                     </p>
                 </div>
@@ -97,11 +97,20 @@
             <!-- Download / Release Status Trigger -->
             <div class="pt-6 border-t border-archive-border font-mono text-xs mt-6">
                 {% if not book.is_released %}
-                    <!-- UNRELEASED STATE -->
+                    {% if book.is_clearance_unlocked %}
+                    <!-- REWARD UNLOCKED STATE AT 100% -->
+                    <a href="/static/downloads/{{ book.file_name }}" 
+                       target="_blank"
+                       class="w-full bg-emerald-800 hover:bg-emerald-700 text-parchment-100 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 border border-emerald-600 font-bold uppercase tracking-wider shadow-lg">
+                        <span>🔓</span> ACCESS 100% REWARD PREVIEW
+                    </a>
+                    {% else %}
+                    <!-- UNRELEASED & LOCKED STATE -->
                     <button disabled 
                             class="w-full bg-archive-bg/50 border border-blood-900/60 text-archive-muted font-gothic py-3 px-4 rounded-sm cursor-not-allowed flex justify-center items-center gap-2 uppercase tracking-wider font-bold">
-                        <span>🔒</span> Sealed Archival Record (Coming Soon)
+                        <span>🔒</span> Sealed Archival Record (Requires 100%)
                     </button>
+                    {% endif %}
                 {% elif is_authenticated %}
                     <!-- RELEASED & AUTHENTICATED STATE -->
                     <a href="/vault/download/{{ book.id }}" 
