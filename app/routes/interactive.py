@@ -1,8 +1,8 @@
+from typing import Optional
 from fastapi import APIRouter, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-# Relative import pointing from app/routes/interactive.py -> app/services/script_engine.py
 from ..services.script_engine import get_script_node
 
 router = APIRouter()
@@ -58,17 +58,19 @@ async def render_interactive_engine(request: Request, response: Response):
 async def process_story_choice(
     request: Request,
     response: Response,
-    next_node_id: str = Form(...),
-    choice_id: str = Form(...)
+    next_node_id: Optional[str] = Form(None),
+    next_node: Optional[str] = Form(None),
+    choice_id: Optional[str] = Form(None)
 ):
     """Processes story choice, updates reader affinity state via cookies, and returns updated HTMX node."""
+    target_node_id = next_node_id or next_node or "node_001"
+    
     current_sanctity = int(request.cookies.get("sanctity", 0))
     current_corruption = int(request.cookies.get("corruption", 0))
     
     # Fetch requested node or fallback safely to starting node
-    node = get_script_node(next_node_id) or get_script_node("node_001")
+    node = get_script_node(target_node_id) or get_script_node("node_001")
     
-    # Type-safety guard ensuring Pylance knows `node` is non-None
     if not node:
         return HTMLResponse(
             content="<p class='text-blood-500 font-mono text-xs'>[ ERROR: SIGNAL LOSS :: NODE NOT FOUND ]</p>",
@@ -77,11 +79,12 @@ async def process_story_choice(
     
     delta_s = 0
     delta_c = 0
-    for choice in node.choices:
-        if choice.id == choice_id:
-            delta_s = choice.sanctity_delta
-            delta_c = choice.corruption_delta
-            break
+    if choice_id and node.choices:
+        for choice in node.choices:
+            if choice.id == choice_id:
+                delta_s = choice.sanctity_delta
+                delta_c = choice.corruption_delta
+                break
             
     new_sanctity = max(0, current_sanctity + delta_s)
     new_corruption = max(0, current_corruption + delta_c)
@@ -104,7 +107,6 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
     """Terminal chat endpoint generating in-character responses."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     
-    # AI response placeholder—ready to connect to your preferred LLM provider
     ai_response = f"[{character_id.upper()} RESONANCE]: The frequency holds. '{message}' has been recorded in the register."
     
     return templates.TemplateResponse(
