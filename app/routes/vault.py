@@ -1,26 +1,30 @@
+import os
+from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-import os
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# Mock Book Database for the RSFW Series
+# Series Book Database with Interactive Affinity Clearances
 BOOKS_DB = [
     {
         "id": "book-1",
         "title": "The Blood Lily Contract",
         "subtitle": "Book 1 of The Reform School for Witches",
-        "cover_url": "/static/media/dossiers/rsfwbook1.jpg", # Or your book cover path
+        "cover_url": "/static/media/dossiers/rsfwbook1.jpg",
         "file_name": "RSFW_Book_1_The_Blood_Lily_Contract.pdf",
         "pdf_path": "app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf",
         "tagline": "She was sold to the root. He was forged to be a shield.",
         "description": "In the deep shadows of New Orleans, time isn't measured by clocks, but by contracts. Kimbra Woods flees a nightmare ritual and storms Our Lady of Tears Academy, colliding with Roman De La Croix.",
-       "is_members_only": True,
-        "is_released": True,  # RELEASED
-        "release_status": "Available Now"
+        "is_members_only": True,
+        "is_released": True,
+        "release_status": "Available Now",
+        "required_type": None,
+        "required_score": 0,
+        "unlock_perk": "Full Manuscript Access"
     },
     {
         "id": "book-2",
@@ -32,8 +36,11 @@ BOOKS_DB = [
         "tagline": "The refuge has cracks. The serpent is inside.",
         "description": "As Damian Boudreaux stirs in the North Wing Vault, a threat from the inside has already breached the perimeter salt-line, forcing Roman and Kimbra into a holy alliance.",
         "is_members_only": True,
-        "is_released": False,  # LOCKED / UNRELEASED
-        "release_status": "Coming Soon"
+        "is_released": False,
+        "release_status": "Archival Seal Locked",
+        "required_type": "sanctity",
+        "required_score": 30,
+        "unlock_perk": "Decrypted Chapter 1 Preview (Sanctity Threshold Met)"
     },
     {
         "id": "book-3",
@@ -45,13 +52,37 @@ BOOKS_DB = [
         "tagline": "The harvest has begun. New Orleans has run out of time.",
         "description": "Vincent Boudreaux weaves an ancient parasitic text into the New Orleans power grid, causing the French Quarter sky to bleed electric violet. Roman, Kimbra, and a restored Damian descend into St. Louis Cathedral for a final audit to save a city swallowing itself in debt.",
         "is_members_only": True,
-        "is_released": False,  # LOCKED / UNRELEASED
-        "release_status": "In Archival Preparation"
+        "is_released": False,
+        "release_status": "In Archival Preparation",
+        "required_type": "corruption",
+        "required_score": 50,
+        "unlock_perk": "Classified Sanguine Audit Ledger (Corruption Threshold Met)"
     }
 ]
+
 @router.get("/", response_class=HTMLResponse)
 async def render_vault_page(request: Request):
     is_authenticated = request.cookies.get("rsfw_member_token") is not None
+    sanctity = int(request.cookies.get("sanctity", 0))
+    corruption = int(request.cookies.get("corruption", 0))
+
+    processed_books = []
+    for book in BOOKS_DB:
+        book_data = book.copy()
+        
+        # Evaluate interactive clearance state
+        if book["required_type"] == "sanctity":
+            score = sanctity
+        elif book["required_type"] == "corruption":
+            score = corruption
+        else:
+            score = 100
+
+        book_data["affinity_score"] = score
+        book_data["is_clearance_unlocked"] = score >= book["required_score"]
+        book_data["clearance_progress"] = min(100, int((score / book["required_score"]) * 100)) if book["required_score"] > 0 else 100
+        
+        processed_books.append(book_data)
 
     return templates.TemplateResponse(
         request=request,
@@ -59,8 +90,10 @@ async def render_vault_page(request: Request):
         context={
             "page_title": "Classified Book Vault | The Reform School for Witches Series",
             "meta_description": "Access and download official PDF releases of The Reform School for Witches trilogy (rsfwseries.com). Free access for registered initiates.",
-            "books": BOOKS_DB,
-            "is_authenticated": is_authenticated
+            "books": processed_books,
+            "is_authenticated": is_authenticated,
+            "sanctity": sanctity,
+            "corruption": corruption
         }
     )
 
@@ -111,4 +144,3 @@ async def register_member(request: Request):
     )
     response.set_cookie(key="rsfw_member_token", value=f"initiate_{email}", max_age=2592000)
     return response
-
