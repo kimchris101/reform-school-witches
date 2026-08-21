@@ -5,8 +5,8 @@ class ScriptChoice(BaseModel):
     id: str
     text: str
     next_node_id: str
-    sanctity_delta: int = 0      # Points added toward Sacramental Sanctity
-    corruption_delta: int = 0    # Points added toward Sanguine Corruption
+    sanctity_delta: int = 0
+    corruption_delta: int = 0
     archetype_affinity: Optional[str] = None
 
 class ScriptNode(BaseModel):
@@ -19,17 +19,16 @@ class ScriptNode(BaseModel):
     choices: List[ScriptChoice]
     unlock_media_id: Optional[str] = None
 
-# Comprehensive Multi-Node Branching Script Registry
 SCRIPT_NODES: dict[str, ScriptNode] = {
     # ------------------------------------------------------------------
-    # ACT I: THE SALT LINE (Entry Point)
+    # ACT I: THE SALT LINE
     # ------------------------------------------------------------------
     "node_001": ScriptNode(
         node_id="node_001",
         speaker="Roman De La Croix",
         speaker_title="Perimeter Marshal",
         portrait_url="/static/media/dossiers/roman.jpg",
-        background_url="/static/media/bg_courtyard.jpg",
+        background_url="/static/media/dossiers/bg_courtyard.jpg",
         dialogue="The river fog is heavy tonight. Step across the salt line before the broadcast signal catches your trailing frequency. Once you cross, the Crimson Root loses your trace.",
         choices=[
             ScriptChoice(
@@ -60,14 +59,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
     ),
 
     # ------------------------------------------------------------------
-    # BRANCH A: THE SACRED SENTRY (High Sanctity Path)
+    # BRANCH A: THE SACRED SENTRY
     # ------------------------------------------------------------------
     "node_002_salt": ScriptNode(
         node_id="node_002_salt",
         speaker="Ignatius Santiago",
         speaker_title="Penitent Sentry",
         portrait_url="/static/media/dossiers/ignatius.jpg",
-        background_url="/static/media/bg_perimeter.jpg",
+        background_url="/static/media/dossiers/bg_perimeter.jpg",
         dialogue="Firm footing. The iron gates of Our Lady of Tears only hold if those inside know how to anchor themselves. The sanctuary lamp burns in the north tower—Father Manuel awaits.",
         choices=[
             ScriptChoice(
@@ -91,7 +90,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Father Manuel",
         speaker_title="Rector & Chief Exorcist",
         portrait_url="/static/media/dossiers/manuel.jpg",
-        background_url="/static/media/bg_chapel.jpg",
+        background_url="/static/media/dossiers/bg_chapel.jpg",
         dialogue="Welcome to the Sanctuary. You carry the static of the outer world, but here, the Sacramental Seal covers all debts. Are you prepared to take the Sponsor's Vow?",
         choices=[
             ScriptChoice(
@@ -115,7 +114,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Ignatius Santiago",
         speaker_title="Penitent Sentry",
         portrait_url="/static/media/dossiers/ignatius.jpg",
-        background_url="/static/media/bg_perimeter.jpg",
+        background_url="/static/media/dossiers/bg_perimeter.jpg",
         dialogue="Look out into the brine moat. Damian's siphons are pressing hard against our southern boundary. Without a strong Chalice and Shield co-link, these salt lines won't survive the harvest season.",
         choices=[
             ScriptChoice(
@@ -136,14 +135,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
     ),
 
     # ------------------------------------------------------------------
-    # BRANCH B: THE SANGUINE PACT (High Corruption Path)
+    # BRANCH B: THE SANGUINE PACT
     # ------------------------------------------------------------------
     "node_002_listen": ScriptNode(
         node_id="node_002_listen",
         speaker="Damian Boudreaux",
         speaker_title="The Crimson Heir",
         portrait_url="/static/media/dossiers/damian.jpg",
-        background_url="/static/media/bg_archivist.jpg",
+        background_url="/static/media/dossiers/bg_archivist.jpg",
         dialogue="You feel the pull of the Crimson Root, don't you? The salt is a cage designed by frightened old men. The Sanguine Tether is not a curse—it is an eternal inheritance.",
         choices=[
             ScriptChoice(
@@ -167,7 +166,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Damian Boudreaux",
         speaker_title="The Crimson Heir",
         portrait_url="/static/media/dossiers/damian.jpg",
-        background_url="/static/media/bg_archivist.jpg",
+        background_url="/static/media/dossiers/bg_archivist.jpg",
         dialogue="Delicious. The biological graft locks into place. You are no longer bound by weak mortal decay. Together, we will bleed the Academy's defenses dry.",
         choices=[
             ScriptChoice(
@@ -184,7 +183,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Genesis",
         speaker_title="Tactical Disruptor",
         portrait_url="/static/media/dossiers/genesis.jpg",
-        background_url="/static/media/bg_vault.jpg",
+        background_url="/static/media/dossiers/bg_vault.jpg",
         dialogue="Shh! Keep your voice low. I'm intercepting Vincent Boudreaux's ledger transmissions. If you touch that ledger without scrambling your frequency, Damian will harvest your soul in six seconds flat.",
         choices=[
             ScriptChoice(
@@ -205,14 +204,14 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
     ),
 
     # ------------------------------------------------------------------
-    # BRANCH C: THE CO-LINK CIRCUIT (Balanced Path)
+    # BRANCH C: THE CO-LINK CIRCUIT
     # ------------------------------------------------------------------
     "node_002_colink": ScriptNode(
         node_id="node_002_colink",
         speaker="Kimbra Woods",
         speaker_title="Consecrated Vessel",
         portrait_url="/static/media/dossiers/kimbra.jpg",
-        background_url="/static/media/bg_chapel.jpg",
+        background_url="/static/media/dossiers/bg_chapel.jpg",
         dialogue="Your spiritual resonance flares when you lock in like that. Keep your interior doors locked—the light in this courtyard burns hot, but the darkness outside is starving.",
         choices=[
             ScriptChoice(
@@ -236,7 +235,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Kimbra Woods",
         speaker_title="Consecrated Vessel",
         portrait_url="/static/media/dossiers/kimbra.jpg",
-        background_url="/static/media/bg_chapel.jpg",
+        background_url="/static/media/dossiers/bg_chapel.jpg",
         dialogue="It was the Emergency Baptism in the White Room. When Father Manuel poured the holy water, my scar burned like molten silver. The tether snapped, and for the first time in ten years... I could breathe.",
         choices=[
             ScriptChoice(
@@ -257,7 +256,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Father Manuel",
         speaker_title="Rector & Chief Exorcist",
         portrait_url="/static/media/dossiers/manuel.jpg",
-        background_url="/static/media/bg_chapel.jpg",
+        background_url="/static/media/dossiers/bg_chapel.jpg",
         dialogue="The Sacramental Shield stands firm. Your spirit is anchored in the Kingdom, and no Sanguine Tether can claim you. You are officially an Exception of Our Lady of Tears.",
         choices=[
             ScriptChoice(
@@ -274,7 +273,7 @@ SCRIPT_NODES: dict[str, ScriptNode] = {
         speaker="Damian Boudreaux",
         speaker_title="The Crimson Heir",
         portrait_url="/static/media/dossiers/damian.jpg",
-        background_url="/static/media/bg_archivist.jpg",
+        background_url="/static/media/dossiers/bg_archivist.jpg",
         dialogue="The salt line crumbles. The Crimson Root has claimed another soul for the Boudreaux ledger. You are tethered to the Hearth forever.",
         choices=[
             ScriptChoice(
