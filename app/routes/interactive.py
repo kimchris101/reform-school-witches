@@ -45,7 +45,19 @@ SYSTEM_PROMPTS = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
-    """Renders visual novel engine and initializes global root cookies bounded between 0 and 100."""
+    """Renders engine if authenticated via Intake Exam; otherwise displays clearance restriction screen."""
+    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+
+    if not is_authenticated:
+        return templates.TemplateResponse(
+            request=request,
+            name="pages/intake_required.html",
+            context={
+                "page_title": "Intake Exam Required | The Reform School for Witches",
+                "meta_description": "Complete your intake exam registration to unlock access to the interactive script engine."
+            }
+        )
+
     try:
         sanctity = min(100, max(0, int(request.cookies.get("sanctity", 0))))
     except (ValueError, TypeError):
@@ -83,10 +95,16 @@ async def process_story_choice(
     next_node: Optional[str] = Form(None),
     choice_id: Optional[str] = Form(None)
 ):
-    """Processes story choices applying a strict seesaw balance where opposing metrics drain each other."""
+    """Processes story choice actions with zero-sum metric calculation."""
+    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+    if not is_authenticated:
+        return HTMLResponse(
+            content="<p class='text-blood-500 font-mono text-xs'>[ ERROR: INTAKE EXAM CLEARANCE EXPIRED ]</p>",
+            status_code=401
+        )
+
     target_node_id = next_node_id or next_node or "node_001"
     
-    # 1. Read existing running scores directly from cookies
     try:
         current_sanctity = int(request.cookies.get("sanctity", 0))
     except (ValueError, TypeError):
@@ -97,7 +115,6 @@ async def process_story_choice(
     except (ValueError, TypeError):
         current_corruption = 0
 
-    # 2. Get target node
     target_node = get_script_node(target_node_id) or get_script_node("node_001")
     
     if not target_node:
@@ -106,7 +123,6 @@ async def process_story_choice(
             status_code=404
         )
     
-    # 3. Search entire script tree for choice_id to capture score deltas
     delta_s = 0
     delta_c = 0
     found = False
@@ -122,17 +138,12 @@ async def process_story_choice(
             if found:
                 break
 
-    # 4. Zero-Sum Seesaw Calculation:
-    # Gaining Sanctity (delta_s) reduces Corruption by that same amount.
-    # Gaining Corruption (delta_c) reduces Sanctity by that same amount.
     raw_sanctity = current_sanctity + delta_s - delta_c
     raw_corruption = current_corruption + delta_c - delta_s
 
-    # Clamp bounds strictly between 0% and 100%
     new_sanctity = min(100, max(0, raw_sanctity))
     new_corruption = min(100, max(0, raw_corruption))
     
-    # 5. Render updated story component
     template_res = templates.TemplateResponse(
         request=request,
         name="components/story_node.html",
@@ -143,7 +154,6 @@ async def process_story_choice(
         }
     )
     
-    # 6. Save updated cookies globally across path="/"
     template_res.set_cookie(key="sanctity", value=str(new_sanctity), path="/", samesite="lax", max_age=2592000)
     template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", samesite="lax", max_age=2592000)
     
@@ -190,7 +200,6 @@ async def render_chat_modal(request: Request, character_id: str):
 async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
     """Live terminal chat endpoint using RAG lore retrieval and Groq API."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
-    
     lore_context = retrieve_lore_context(message)
     
     augmented_system_prompt = (
