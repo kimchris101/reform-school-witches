@@ -24,18 +24,21 @@
 </script>
     </header>
 
-    <!-- Authentication Status Banner -->
-    <div id="vault-status-banner" class="mb-10">
+    <!-- Authentication & Interactive Affinity Status Banner -->
+    <div id="vault-status-banner" class="mb-10 space-y-3 font-mono text-xs">
         {% if is_authenticated %}
-            <div class="bg-archive-card border border-blood-700/80 p-4 rounded-sm flex justify-between items-center font-mono text-xs">
+            <div class="bg-archive-card border border-blood-700/80 p-4 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <span class="text-amber-400 font-bold flex items-center gap-2">
                     <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     CLEARANCE GRANTED: Initiate Access Active
                 </span>
-                <span class="text-archive-muted">All Available Vault PDF Downloads Unlocked</span>
+                <div class="flex items-center gap-4 text-archive-muted">
+                    <span>SANCTITY: <strong class="text-amber-400">{{ sanctity }}%</strong></span>
+                    <span>CORRUPTION: <strong class="text-blood-500">{{ corruption }}%</strong></span>
+                </div>
             </div>
         {% else %}
-            <div class="bg-blood-950/60 border border-blood-800 p-6 rounded-sm flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-xs">
+            <div class="bg-blood-950/60 border border-blood-800 p-6 rounded-sm flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <span class="text-blood-500 font-bold uppercase block tracking-wider mb-1">🔒 ARCHIVAL CLEARANCE REQUIRED</span>
                     <p class="text-parchment-300 font-serif text-sm">Register as an Academy initiate to unlock free PDF downloads of the series.</p>
@@ -69,6 +72,26 @@
                     <p class="text-xs font-serif italic text-blood-500 mb-3">"{{ book.tagline }}"</p>
                     <p class="text-xs font-serif text-parchment-300 leading-relaxed">{{ book.description }}</p>
                 </div>
+
+                <!-- Interactive Affinity Progress for Restricted Records -->
+                {% if book.required_type %}
+                <div class="bg-black/60 p-3 rounded border border-blood-900/60 space-y-2 font-mono text-[10px]">
+                    <div class="flex justify-between items-center">
+                        <span class="text-amber-400 uppercase font-bold">RESONANCE MATCH ({{ book.required_type|upper }})</span>
+                        <span class="text-parchment-300">{{ book.clearance_progress }}%</span>
+                    </div>
+                    <div class="w-full bg-blood-950 h-1.5 rounded-full overflow-hidden border border-blood-900/60">
+                        <div class="bg-blood-500 h-full transition-all duration-500" style="width: {{ book.clearance_progress }}%;"></div>
+                    </div>
+                    <p class="text-[9px] text-archive-muted italic">
+                        {% if book.is_clearance_unlocked %}
+                        <span class="text-emerald-400 font-bold">✓ {{ book.unlock_perk }}</span>
+                        {% else %}
+                        <span>🔒 Requires {{ book.required_score }}% {{ book.required_type|capitalize }} in Interactive Script to unlock early manuscript preview.</span>
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Download / Release Status Trigger -->
@@ -83,7 +106,7 @@
                     <!-- RELEASED & AUTHENTICATED STATE -->
                     <a href="/vault/download/{{ book.id }}" 
                        download
-                       class="w-full bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 border border-blood-600 font-bold uppercase tracking-wider">
+                       class="w-full bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 border border-blood-600 font-bold uppercase tracking-wider shadow-lg">
                         <span>📥</span> Download PDF File
                     </a>
                 {% else %}
