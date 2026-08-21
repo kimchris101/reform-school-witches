@@ -14,12 +14,14 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/", response_class=HTMLResponse)
 async def render_intake_page(request: Request):
     """Renders the main Academy Intake Diagnostic Exam page."""
+    is_authenticated = request.cookies.get("rsfw_member_token") is not None
     return templates.TemplateResponse(
         request=request,
         name="pages/intake.html",
         context={
             "page_title": "Academy Intake & Diagnostic Protocol | Our Lady of Tears",
-            "meta_description": "Submit to the Diocesan Diagnostic Protocol at Our Lady of Tears Academy. Determine your spiritual frequency and receive your Official Disciplinary File."
+            "meta_description": "Submit to the Diocesan Diagnostic Protocol at Our Lady of Tears Academy. Determine your spiritual frequency and receive your Official Disciplinary File.",
+            "is_authenticated": is_authenticated
         }
     )
 
@@ -36,7 +38,7 @@ async def evaluate_intake_submission(
     q4: str = Form(...),
     q5: str = Form(...)
 ):
-    """Processes intake choices via HTMX, triggers email delivery, and returns the result."""
+    """Processes intake choices via HTMX, sets member cookie, triggers email delivery, and returns the result."""
     try:
         answers = [
             QuizAnswer(question_id=1, selected_option=q1),
@@ -76,6 +78,15 @@ async def evaluate_intake_submission(
             "letter": result.diocesan_letter,
             "user_email": submission.user_email
         }
+    )
+
+    # AUTHENTICATION LOCK FIX: Set member cookie globally on intake completion
+    resp.set_cookie(
+        key="rsfw_member_token",
+        value=f"initiate_{submission.user_email}",
+        path="/",
+        samesite="lax",
+        max_age=2592000
     )
 
     # Trigger Sacramental Bond cutscene automatically for Co-Link results
