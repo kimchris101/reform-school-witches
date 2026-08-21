@@ -45,7 +45,7 @@ SYSTEM_PROMPTS = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
-    """Renders visual novel engine and initializes global root cookies capped between 0 and 100."""
+    """Renders visual novel engine and initializes global root cookies bounded between 0 and 100."""
     try:
         sanctity = min(100, max(0, int(request.cookies.get("sanctity", 0))))
     except (ValueError, TypeError):
@@ -83,7 +83,7 @@ async def process_story_choice(
     next_node: Optional[str] = Form(None),
     choice_id: Optional[str] = Form(None)
 ):
-    """Processes story choices, applies positive/negative deltas, and clamps scores between 0% and 100%."""
+    """Processes story choices applying a strict seesaw balance where opposing metrics drain each other."""
     target_node_id = next_node_id or next_node or "node_001"
     
     # 1. Read existing running scores directly from cookies
@@ -106,7 +106,7 @@ async def process_story_choice(
             status_code=404
         )
     
-    # 3. Locate choice in SCRIPT_NODES to extract score deltas (positive or negative)
+    # 3. Search entire script tree for choice_id to capture score deltas
     delta_s = 0
     delta_c = 0
     found = False
@@ -122,9 +122,15 @@ async def process_story_choice(
             if found:
                 break
 
-    # 4. Apply deltas and strictly cap scores between 0% and 100%
-    new_sanctity = min(100, max(0, current_sanctity + delta_s))
-    new_corruption = min(100, max(0, current_corruption + delta_c))
+    # 4. Zero-Sum Seesaw Calculation:
+    # Gaining Sanctity (delta_s) reduces Corruption by that same amount.
+    # Gaining Corruption (delta_c) reduces Sanctity by that same amount.
+    raw_sanctity = current_sanctity + delta_s - delta_c
+    raw_corruption = current_corruption + delta_c - delta_s
+
+    # Clamp bounds strictly between 0% and 100%
+    new_sanctity = min(100, max(0, raw_sanctity))
+    new_corruption = min(100, max(0, raw_corruption))
     
     # 5. Render updated story component
     template_res = templates.TemplateResponse(
