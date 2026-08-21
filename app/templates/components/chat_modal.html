@@ -1,0 +1,39 @@
+<div id="chat-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-archive-card border-2 border-blood-900 rounded-sm w-full max-w-xl p-6 shadow-2xl relative font-mono text-xs">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-blood-900/60 pb-3 mb-4">
+            <span class="text-amber-400 font-bold uppercase tracking-widest">
+                [ TERMINAL INTERROGATION :: {{ character_name|upper }} ]
+            </span>
+            <button onclick="document.getElementById('chat-modal').remove()" 
+                    class="text-blood-500 hover:text-blood-700 font-bold px-2 py-1 border border-blood-900/60 hover:border-blood-700 rounded transition-colors">
+                ✕ CLOSE
+            </button>
+        </div>
+
+        <!-- Terminal Chat Thread -->
+        <div id="chat-thread" class="h-64 overflow-y-auto space-y-3 pr-2 mb-4 bg-archive-bg/90 p-4 rounded border border-archive-border/60 font-serif text-sm">
+            <div class="font-mono text-[10px] text-archive-muted italic">
+                [ SIGNAL ESTABLISHED WITH {{ character_name|upper }}. MANUSCRIPT RAG INDEX ACTIVE. ]
+            </div>
+        </div>
+
+        <!-- Transmission Input Form -->
+        <form hx-post="/interactive/chat/{{ character_id }}" 
+              hx-target="#chat-thread" 
+              hx-swap="beforeend" 
+              hx-on::after-request="this.reset(); document.getElementById('chat-thread').scrollTop = document.getElementById('chat-thread').scrollHeight;"
+              class="flex gap-2 font-mono">
+            <input type="text" 
+                   name="message" 
+                   placeholder="Transmit inquiry to persona..." 
+                   required 
+                   class="flex-1 bg-archive-bg border border-blood-900 focus:border-blood-700 text-parchment-100 text-xs p-2.5 rounded-sm focus:outline-none">
+            <button type="submit" 
+                    class="bg-blood-800 hover:bg-blood-700 text-parchment-100 font-bold tracking-widest uppercase px-4 py-2.5 rounded-sm transition-colors border border-blood-700">
+                TRANSMIT
+            </button>
+        </form>
+    </div>
+</div>
