@@ -1,25 +1,56 @@
 <div id="story-viewport" class="bg-archive-card border-2 border-blood-900 rounded-sm p-6 space-y-6 font-serif animate-fade-in">
-    <div class="flex justify-between items-center border-b border-blood-900/60 pb-3 font-mono text-xs">
-        <span class="text-blood-500 font-bold uppercase tracking-widest">[ {{ node.title }} ]</span>
+    <!-- Header with Metrics & Location -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-blood-900/60 pb-3 gap-2 font-mono text-xs">
+        <div class="flex items-center gap-3">
+            <span class="text-blood-500 font-bold uppercase tracking-widest">[ {{ node.speaker_title or 'CLASSIFIED NODE' }} ]</span>
+            <span class="text-archive-muted">|</span>
+            <span class="text-amber-400">SANCTITY: <strong>{{ sanctity or 0 }}%</strong></span>
+            <span class="text-archive-muted">|</span>
+            <span class="text-blood-500">CORRUPTION: <strong>{{ corruption or 0 }}%</strong></span>
+        </div>
         <span class="text-parchment-300">SPEAKER: <strong class="text-parchment-100">{{ node.speaker }}</strong></span>
     </div>
 
-    <div class="bg-archive-bg/90 p-5 border-l-4 border-blood-800 text-parchment-100 text-sm md:text-base leading-relaxed italic">
-        "{{ node.dialogue }}"
+    <!-- Dialogue Box & Portrait -->
+    <div class="flex flex-col md:flex-row gap-4 items-start">
+        {% if node.portrait_url %}
+        <img src="{{ node.portrait_url }}" alt="{{ node.speaker }}" class="w-20 h-20 rounded border border-blood-900/80 object-cover shadow-lg shrink-0">
+        {% endif %}
+        <div class="bg-archive-bg/90 p-5 border-l-4 border-blood-800 text-parchment-100 text-sm md:text-base leading-relaxed italic flex-1">
+            "{{ node.dialogue }}"
+        </div>
     </div>
 
+    <!-- Action Choices -->
     <div class="space-y-3 font-mono text-xs">
         <p class="text-blood-500 uppercase tracking-widest font-bold">Choose Your Action:</p>
         {% for choice in node.choices %}
-        <button hx-post="/interactive/choice"
-                hx-target="#story-viewport"
-                hx-swap="outerHTML"
-                name="next_node"
-                value="{{ choice.next_node }}"
-                class="w-full text-left bg-archive-bg hover:bg-blood-950/80 border border-blood-900 text-parchment-200 hover:text-parchment-100 px-4 py-3 rounded-sm transition-colors flex items-center justify-between">
-            <span>✝ {{ choice.text }}</span>
-            <span class="text-blood-500">→</span>
-        </button>
+        <form hx-post="/interactive/choice" hx-target="#story-viewport" hx-swap="outerHTML">
+            <input type="hidden" name="next_node_id" value="{{ choice.next_node_id }}">
+            <input type="hidden" name="choice_id" value="{{ choice.id }}">
+            <button type="submit"
+                    class="w-full text-left bg-archive-bg hover:bg-blood-950/80 border border-blood-900 text-parchment-200 hover:text-parchment-100 px-4 py-3 rounded-sm transition-colors flex items-center justify-between group">
+                <span>✝ {{ choice.text }}</span>
+                <span class="text-blood-500 group-hover:translate-x-1 transition-transform">
+                    {% if choice.archetype_affinity %}
+                    <span class="text-[10px] text-archive-muted mr-2 uppercase">[{{ choice.archetype_affinity }}]</span>
+                    {% endif %}
+                    →
+                </span>
+            </button>
+        </form>
         {% endfor %}
     </div>
+
+    <!-- Terminal Interrogation Button -->
+    <div class="border-t border-blood-900/40 pt-4 flex justify-end">
+        <button hx-get="/interactive/chat-modal/{{ node.speaker|lower|replace(' ', '') }}" 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML"
+                class="font-mono text-xs text-amber-400 hover:text-amber-300 border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 rounded uppercase tracking-widest transition-colors">
+            [ INTERROGATE {{ node.speaker|upper }} VIA TERMINAL ]
+        </button>
+    </div>
 </div>
+
+<div id="modal-container"></div>
