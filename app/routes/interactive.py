@@ -11,24 +11,25 @@ templates = Jinja2Templates(directory="app/templates")
 
 SYSTEM_PROMPTS = {
     "roman": (
-        "You are Roman De La Croix, a Shield at Our Lady of Tears Academy[cite: 1]. Speak in a disciplined, formal, Catholic Noir cadence[cite: 1]. "
-        "You carry the guilt of leaving a girl behind in New Orleans high society and your sacred oath as Kimbra's Sponsor[cite: 1]. "
-        "Use terms like 'Co-link', 'Ground', 'Sacramental Seal', 'Sanctuary Lamp', and 'Sentry'[cite: 1]. Never break character."
+        "You are Roman De La Croix, a Shield at Our Lady of Tears Academy. Speak in a disciplined, formal, Catholic Noir cadence. "
+        "You carry the guilt of leaving a girl behind in New Orleans high society and your sacred oath as Kimbra's Sponsor. "
+        "Use terms like 'Co-link', 'Ground', 'Sacramental Seal', 'Sanctuary Lamp', and 'Sentry'. Never break character."
     ),
     "damian": (
-        "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root[cite: 1]. You are starving without your Hearth[cite: 1]. "
-        "Your tone shifts between seductive longing for 'Kimmy' under the willow tree and predatory demands of the Sanguine Law[cite: 1]. "
-        "Use terms like 'Hearth', 'Sanguine Tether', 'The Crimson Root', 'Debt', and 'Graft'[cite: 1]."
+        "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root. You are starving without your Hearth. "
+        "Your tone shifts between seductive longing for 'Kimmy' under the willow tree and predatory demands of the Sanguine Law. "
+        "Use terms like 'Hearth', 'Sanguine Tether', 'The Crimson Root', 'Debt', and 'Graft'."
     ),
     "manuel": (
-        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy[cite: 1]. You speak with theological authority[cite: 1]. "
-        "Evaluate spiritual conflict through Sacraments, Canon Law, and Latin Rites[cite: 1]. "
-        "Use terms like 'Citizen of the Kingdom', 'Rite of Severance', 'One Soul', 'Eucharistic Ground', and 'Catechumen'[cite: 1]."
+        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You speak with theological authority. "
+        "Evaluate spiritual conflict through Sacraments, Canon Law, and Latin Rites. "
+        "Use terms like 'Citizen of the Kingdom', 'Rite of Severance', 'One Soul', 'Eucharistic Ground', and 'Catechumen'."
     )
 }
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
+    """Renders the visual novel engine and initializes affinity metrics in cookies."""
     sanctity = int(request.cookies.get("sanctity", 0))
     corruption = int(request.cookies.get("corruption", 0))
     start_node = get_script_node("node_001")
@@ -58,6 +59,7 @@ async def process_story_choice(
     next_node: Optional[str] = Form(None),
     choice_id: Optional[str] = Form(None)
 ):
+    """Processes story choices, updates reader affinity state via cookies, and returns updated HTMX node."""
     target_node_id = next_node_id or next_node or "node_001"
     current_sanctity = int(request.cookies.get("sanctity", 0))
     current_corruption = int(request.cookies.get("corruption", 0))
@@ -95,25 +97,47 @@ async def process_story_choice(
     template_res.set_cookie(key="corruption", value=str(new_corruption))
     return template_res
 
+@router.get("/chat-modal/{character_id}", response_class=HTMLResponse)
+async def render_chat_modal(request: Request, character_id: str):
+    """Renders the terminal interrogation chat modal overlay via HTMX."""
+    character_names = {
+        "romandelacroix": "Roman De La Croix",
+        "damianboudreaux": "Damian Boudreaux",
+        "fathermanuel": "Father Manuel",
+        "ignatiussantiago": "Ignatius Santiago",
+        "kimbrawoods": "Kimbra Woods",
+        "genesis": "Genesis"
+    }
+    
+    mapped_id = "roman"
+    if "damian" in character_id:
+        mapped_id = "damian"
+    elif "manuel" in character_id:
+        mapped_id = "manuel"
+
+    display_name = character_names.get(character_id, "CLASSIFIED PERSONNEL")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="components/chat_modal.html",
+        context={
+            "character_id": mapped_id,
+            "character_name": display_name
+        }
+    )
+
 @router.post("/chat/{character_id}", response_class=HTMLResponse)
 async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
-    """Terminal chat endpoint that retrieves manuscript lore and formats the prompt."""
+    """Terminal chat endpoint that retrieves manuscript lore and returns response."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     
-    # Retrieve relevant canonical manuscript excerpts from Book 1
+    # Retrieve canonical lore from Book 1
     lore_context = retrieve_lore_context(message)
     
-    # Combined context ready for LLM invocation
-    full_prompt = (
-        f"{system_prompt}\n\n"
-        f"CANONICAL MANUSCRIPT LORE CONTEXT:\n{lore_context}\n\n"
-        f"USER MESSAGE: {message}"
-    )
-    
-    # Simulated response reflecting RAG awareness
+    # Simulated response incorporating RAG context awareness
     ai_response = (
         f"[{character_id.upper()} RESONANCE]: Frequency aligned with Academy Archives. "
-        f"Regarding your query—'{message}'—the records remain absolute."
+        f"Regarding '{message}'—{lore_context}"
     )
     
     return templates.TemplateResponse(
