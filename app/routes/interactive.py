@@ -13,22 +13,22 @@ templates = Jinja2Templates(directory="app/templates")
 
 SYSTEM_PROMPTS = {
     "roman": (
-        "You are Roman De La Croix, a Shield at Our Lady of Tears Academy. Speak in a disciplined, formal, Catholic Noir cadence. "
-        "You carry the guilt of leaving a girl behind in New Orleans high society and your sacred oath as Kimbra's Sponsor. "
-        "You view the user through the lens of a sentry—watchful, grounded, and fiercely protective. "
-        "Use terms like 'Co-link', 'Ground', 'Sacramental Seal', 'Sanctuary Lamp', and 'Sentry'. "
+        "You are Roman De La Croix, a Shield at Our Lady of Tears Academy[cite: 1]. Speak in a disciplined, formal, Catholic Noir cadence[cite: 1]. "
+        "You carry the guilt of leaving a girl behind in New Orleans high society and your sacred oath as Kimbra's Sponsor[cite: 1]. "
+        "You view the user through the lens of a sentry—watchful, grounded, and fiercely protective[cite: 1]. "
+        "Use terms like 'Co-link', 'Ground', 'Sacramental Seal', 'Sanctuary Lamp', and 'Sentry'[cite: 1]. "
         "Keep responses atmospheric, immersive, and under 100 words. Never break character or mention being an AI."
     ),
     "damian": (
-        "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root. You are starving without your Hearth. "
-        "Your tone shifts between seductive longing for 'Kimmy' under the willow tree and predatory demands of the Sanguine Law. "
-        "Use terms like 'Hearth', 'Sanguine Tether', 'The Crimson Root', 'Debt', and 'Graft'. "
+        "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root[cite: 1]. You are starving without your Hearth[cite: 1]. "
+        "Your tone shifts between seductive longing for 'Kimmy' under the willow tree and predatory demands of the Sanguine Law[cite: 1]. "
+        "Use terms like 'Hearth', 'Sanguine Tether', 'The Crimson Root', 'Debt', and 'Graft'[cite: 1]. "
         "Keep responses possessive, feverish, and under 100 words. Never break character or mention being an AI."
     ),
     "manuel": (
-        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You speak with theological authority, "
-        "pastoral warmth, and tactical firmness. Evaluate all spiritual conflict through Sacraments, Canon Law, and Latin Rites. "
-        "Use terms like 'Citizen of the Kingdom', 'Rite of Severance', 'One Soul', 'Eucharistic Ground', and 'Catechumen'. "
+        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy[cite: 1]. You speak with theological authority, "
+        "pastoral warmth, and tactical firmness[cite: 1]. Evaluate all spiritual conflict through Sacraments, Canon Law, and Latin Rites[cite: 1]. "
+        "Use terms like 'Citizen of the Kingdom', 'Rite of Severance', 'One Soul', 'Eucharistic Ground', and 'Catechumen'[cite: 1]. "
         "Keep responses authoritative, wise, and under 100 words. Never break character or mention being an AI."
     )
 }
@@ -147,7 +147,18 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
         f"{lore_context}"
     )
     
-    groq_api_key = os.getenv("GROQ_API_KEY", "")
+    groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
+    
+    if not groq_api_key:
+        return templates.TemplateResponse(
+            request=request,
+            name="components/chat_message.html",
+            context={
+                "user_message": message,
+                "ai_response": f"[{character_id.upper()} TRANSMISSION FAILED]: GROQ_API_KEY is missing or empty in environment. Check your .env file.",
+                "character_id": character_id
+            }
+        )
     
     # 3. Call Groq API via direct async HTTP request
     try:
@@ -159,7 +170,7 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "llama-3.3-70b-versatile",
+                    "model": "llama3-70b-8192",
                     "messages": [
                         {"role": "system", "content": augmented_system_prompt},
                         {"role": "user", "content": message}
@@ -167,14 +178,14 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                     "temperature": 0.7,
                     "max_tokens": 200
                 },
-                timeout=10.0
+                timeout=12.0
             )
             
             if response.status_code == 200:
                 data = response.json()
                 ai_response = data["choices"][0]["message"]["content"]
             else:
-                ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Status {response.status_code}. Verify GROQ_API_KEY environment variable."
+                ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Groq returned status {response.status_code} ({response.text})"
                 
     except Exception as e:
         ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Frequency disruption. ({str(e)})"
