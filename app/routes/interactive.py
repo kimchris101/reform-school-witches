@@ -45,7 +45,7 @@ SYSTEM_PROMPTS = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
-    """Renders the visual novel engine and initializes affinity metrics in cookies."""
+    """Renders visual novel engine and initializes global cookies."""
     sanctity = int(request.cookies.get("sanctity", 0))
     corruption = int(request.cookies.get("corruption", 0))
     start_node = get_script_node("node_001")
@@ -61,10 +61,11 @@ async def render_interactive_engine(request: Request, response: Response):
             "corruption": corruption
         }
     )
+    # Ensure initial cookies are available across all site paths
     if "sanctity" not in request.cookies:
-        res.set_cookie(key="sanctity", value="0")
+        res.set_cookie(key="sanctity", value="0", path="/", max_age=2592000)
     if "corruption" not in request.cookies:
-        res.set_cookie(key="corruption", value="0")
+        res.set_cookie(key="corruption", value="0", path="/", max_age=2592000)
     return res
 
 @router.post("/choice", response_class=HTMLResponse)
@@ -75,7 +76,7 @@ async def process_story_choice(
     next_node: Optional[str] = Form(None),
     choice_id: Optional[str] = Form(None)
 ):
-    """Processes story choices, updates reader affinity state via cookies, and returns updated HTMX node."""
+    """Processes story choices and persists metrics globally to path='/'."""
     target_node_id = next_node_id or next_node or "node_001"
     current_sanctity = int(request.cookies.get("sanctity", 0))
     current_corruption = int(request.cookies.get("corruption", 0))
@@ -109,8 +110,9 @@ async def process_story_choice(
             "corruption": new_corruption
         }
     )
-    template_res.set_cookie(key="sanctity", value=str(new_sanctity))
-    template_res.set_cookie(key="corruption", value=str(new_corruption))
+    # Set cookies globally across all routes
+    template_res.set_cookie(key="sanctity", value=str(new_sanctity), path="/", max_age=2592000)
+    template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", max_age=2592000)
     return template_res
 
 @router.get("/chat-modal/{character_id}", response_class=HTMLResponse)
@@ -152,13 +154,11 @@ async def render_chat_modal(request: Request, character_id: str):
 
 @router.post("/chat/{character_id}", response_class=HTMLResponse)
 async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
-    """Live terminal chat endpoint using RAG lore retrieval and httpx HTTP completion to Groq API."""
+    """Live terminal chat endpoint using RAG lore retrieval and Groq API."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     
-    # 1. Retrieve canonical manuscript context
     lore_context = retrieve_lore_context(message)
     
-    # 2. Build augmented system prompt
     augmented_system_prompt = (
         f"{system_prompt}\n\n"
         f"CANONICAL MANUSCRIPT REPOSITORY LORE:\n"
@@ -179,7 +179,6 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
             }
         )
     
-    # 3. Call Groq API with 500 max_tokens to prevent truncation
     try:
         async with httpx.AsyncClient() as http_client:
             response = await http_client.post(
