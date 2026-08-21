@@ -45,9 +45,17 @@ SYSTEM_PROMPTS = {
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
-    """Renders visual novel engine and initializes global cookies."""
-    sanctity = int(request.cookies.get("sanctity", 0))
-    corruption = int(request.cookies.get("corruption", 0))
+    """Renders visual novel engine and initializes global root cookies."""
+    try:
+        sanctity = int(request.cookies.get("sanctity", 0))
+    except (ValueError, TypeError):
+        sanctity = 0
+
+    try:
+        corruption = int(request.cookies.get("corruption", 0))
+    except (ValueError, TypeError):
+        corruption = 0
+
     start_node = get_script_node("node_001")
     
     res = templates.TemplateResponse(
@@ -61,11 +69,10 @@ async def render_interactive_engine(request: Request, response: Response):
             "corruption": corruption
         }
     )
-    # Ensure initial cookies are available across all site paths
     if "sanctity" not in request.cookies:
-        res.set_cookie(key="sanctity", value="0", path="/", max_age=2592000)
+        res.set_cookie(key="sanctity", value="0", path="/", samesite="lax", max_age=2592000)
     if "corruption" not in request.cookies:
-        res.set_cookie(key="corruption", value="0", path="/", max_age=2592000)
+        res.set_cookie(key="corruption", value="0", path="/", samesite="lax", max_age=2592000)
     return res
 
 @router.post("/choice", response_class=HTMLResponse)
@@ -76,11 +83,19 @@ async def process_story_choice(
     next_node: Optional[str] = Form(None),
     choice_id: Optional[str] = Form(None)
 ):
-    """Processes story choices and persists metrics globally to path='/'."""
+    """Processes choices, computes score deltas, and sets explicit global path cookies."""
     target_node_id = next_node_id or next_node or "node_001"
-    current_sanctity = int(request.cookies.get("sanctity", 0))
-    current_corruption = int(request.cookies.get("corruption", 0))
     
+    try:
+        current_sanctity = int(request.cookies.get("sanctity", 0))
+    except (ValueError, TypeError):
+        current_sanctity = 0
+
+    try:
+        current_corruption = int(request.cookies.get("corruption", 0))
+    except (ValueError, TypeError):
+        current_corruption = 0
+
     node = get_script_node(target_node_id) or get_script_node("node_001")
     
     if not node:
@@ -93,7 +108,7 @@ async def process_story_choice(
     delta_c = 0
     if choice_id and node.choices:
         for choice in node.choices:
-            if choice.id == choice_id:
+            if choice.id == choice_id or choice.next_node_id == target_node_id:
                 delta_s = choice.sanctity_delta
                 delta_c = choice.corruption_delta
                 break
@@ -110,14 +125,14 @@ async def process_story_choice(
             "corruption": new_corruption
         }
     )
-    # Set cookies globally across all routes
-    template_res.set_cookie(key="sanctity", value=str(new_sanctity), path="/", max_age=2592000)
-    template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", max_age=2592000)
+    
+    template_res.set_cookie(key="sanctity", value=str(new_sanctity), path="/", samesite="lax", max_age=2592000)
+    template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", samesite="lax", max_age=2592000)
     return template_res
 
 @router.get("/chat-modal/{character_id}", response_class=HTMLResponse)
 async def render_chat_modal(request: Request, character_id: str):
-    """Renders the terminal interrogation chat modal overlay via HTMX."""
+    """Renders terminal interrogation modal overlay."""
     character_names = {
         "romandelacroix": "Roman De La Croix",
         "damianboudreaux": "Damian Boudreaux",
