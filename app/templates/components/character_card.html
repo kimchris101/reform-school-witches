@@ -1,39 +1,42 @@
-<div class="bg-archive-card border border-archive-border hover:border-blood-700 rounded-sm shadow-xl flex flex-col justify-between overflow-hidden transition-all duration-300 group">
-    <div>
-        <!-- Fixed Portrait Box (Preserves Aspect Ratio & Centers Faces) -->
-        <div class="w-full h-80 bg-archive-bg border-b border-archive-border relative overflow-hidden">
-            <img src="{{ character.image_url }}" 
-                 alt="{{ character.name }}" 
-                 class="w-full h-full object-cover object-top grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500" />
-            
-            <!-- Vignette Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-t from-archive-card via-transparent to-transparent opacity-80 pointer-events-none"></div>
-            
-            <!-- Classification Badge -->
-            <span class="absolute top-3 left-3 bg-archive-bg/90 border border-blood-800 text-amber-400 font-mono text-[9px] uppercase px-2 py-0.5 rounded-sm font-bold z-10 shadow-md">
-                {{ character.classification }}
+<div class="bg-archive-card border border-archive-border hover:border-blood-700 rounded-sm overflow-hidden flex flex-col justify-between transition-all duration-300 shadow-xl group">
+    <!-- Card Portrait Container -->
+    <div class="relative aspect-[3/4] bg-archive-bg overflow-hidden">
+        {% if character.is_spoiler %}
+            <div class="absolute inset-0 bg-archive-bg/90 backdrop-blur-md z-10 flex flex-col items-center justify-center p-4 text-center">
+                <span class="text-2xl mb-2">🔒</span>
+                <p class="text-xs font-mono text-blood-500 uppercase tracking-widest font-bold">Classified Record</p>
+                <p class="text-[11px] font-mono text-archive-muted mt-1">Spoiler Clearance Required</p>
+            </div>
+        {% endif %}
+        
+        <!-- object-top forces the portrait framing to focus on faces rather than cutting off heads -->
+        <img src="{{ character.portrait_url }}" 
+             alt="{{ character.full_name }}" 
+             class="w-full h-full object-cover object-top grayscale contrast-125 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-500"
+             onerror="this.src='https://via.placeholder.com/300x400/070a0f/800c24?text=RECORD+SEALED'">
+        
+        <!-- Darker Gradient Overlay for Maximum Legibility -->
+        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-archive-bg via-archive-bg/90 to-transparent p-4 z-20">
+            <!-- Golden Subtitle Alias -->
+            <span class="text-[11px] font-mono uppercase tracking-widest text-amber-400 font-bold block mb-0.5 shadow-sm">
+                {{ character.alias or character.classification_class }}
             </span>
-        </div>
-
-        <!-- Character Details -->
-        <div class="p-5 space-y-2">
-            <p class="text-[10px] font-mono text-blood-500 font-bold uppercase tracking-widest">{{ character.title_role }}</p>
-            <h3 class="text-xl font-gothic text-parchment-100 uppercase tracking-wider font-bold group-hover:text-amber-400 transition-colors">
-                {{ character.name }}
-            </h3>
-            <p class="text-xs font-serif text-parchment-300 leading-relaxed line-clamp-3">
-                {{ character.short_bio }}
-            </p>
+            <h3 class="text-xl font-gothic text-parchment-100 tracking-wider uppercase font-bold">{{ character.full_name }}</h3>
         </div>
     </div>
 
-    <!-- Dossier Action Button -->
-    <div class="p-5 pt-0">
+    <!-- Card Details & Trigger -->
+    <div class="p-4 bg-archive-card flex flex-col justify-between flex-grow border-t border-archive-border font-mono text-xs">
+        <div class="space-y-2 mb-4">
+            <p class="text-archive-muted"><span class="text-blood-500 font-bold">Patron:</span> {{ character.patron_saint }}</p>
+            <p class="text-archive-muted truncate"><span class="text-blood-500 font-bold">Affinity:</span> {{ character.sacramental_affinity }}</p>
+        </div>
+
         <button hx-get="/dossiers/{{ character.slug }}" 
                 hx-target="#dossier-modal-container" 
                 hx-swap="innerHTML"
-                class="w-full bg-archive-bg hover:bg-blood-950/80 border border-archive-border hover:border-blood-700 text-parchment-200 hover:text-parchment-100 font-gothic py-2.5 px-3 rounded-sm transition-all flex justify-center items-center gap-2 font-bold uppercase tracking-wider text-xs">
-            <span>☩</span> Inspect Personnel File
+                class="w-full bg-archive-bg hover:bg-blood-950/80 border border-archive-border hover:border-blood-700 text-parchment-200 font-gothic text-xs uppercase tracking-widest py-2.5 transition-colors font-bold">
+            Inspect File ➔
         </button>
     </div>
 </div>
