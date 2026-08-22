@@ -196,14 +196,14 @@ async def render_chat_modal(request: Request, character_id: str):
 
 @router.post("/chat/{character_id}", response_class=HTMLResponse)
 async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
-    """Live terminal chat endpoint using RAG lore retrieval and Groq API."""
+    """Live terminal chat endpoint with resilient multi-model failover."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     lore_context = retrieve_lore_context(message)
     
     augmented_prompt = (
         f"{system_prompt}\n\n"
         f"LORE CONTEXT:\n{lore_context}\n\n"
-        f"INSTRUCTION: Answer in 2-3 concise sentences (under 80 words). Do not use bullet points or lists."
+        f"INSTRUCTION: Answer directly in character in 2-3 sentences (under 80 words). Do not use bullet points or lists."
     )
     
     groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
@@ -218,35 +218,49 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                 "character_id": character_id
             }
         )
+
+    # Active model candidates array for seamless failover
+    candidate_models = [
+        "openai/gpt-oss-20b",
+        "llama-3.1-8b-instant",
+        "groq/openai/gpt-oss-20b",
+        "groq/llama-3.1-8b-instant"
+    ]
+
+    ai_response = ""
     
-    try:
-        async with httpx.AsyncClient(timeout=15.0) as http_client:
-            response = await http_client.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {groq_api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "openai/gpt-oss-20b",
-                    "messages": [
-                        {"role": "system", "content": augmented_prompt},
-                        {"role": "user", "content": message}
-                    ],
-                    "temperature": 0.4,
-                    "max_tokens": 200
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                ai_response = data["choices"][0]["message"]["content"].strip()
-            else:
-                ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Server status {response.status_code} - {response.text}"
+    async with httpx.AsyncClient(timeout=12.0) as http_client:
+        for model_id in candidate_models:
+            try:
+                response = await http_client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {groq_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": model_id,
+                        "messages": [
+                            {"role": "system", "content": augmented_prompt},
+                            {"role": "user", "content": message}
+                        ],
+                        "temperature": 0.4,
+                        "max_tokens": 200
+                    }
+                )
                 
-    except Exception as e:
-        ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Frequency disruption. ({str(e)})"
-    
+                if response.status_code == 200:
+                    data = response.json()
+                    content = data["choices"][0]["message"]["content"].strip()
+                    if content:
+                        ai_response = content
+                        break
+            except Exception:
+                continue
+
+    if not ai_response:
+        ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Terminal frequency disruption. Please resend."
+
     return templates.TemplateResponse(
         request=request,
         name="components/chat_message.html",
