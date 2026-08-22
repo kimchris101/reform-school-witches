@@ -98,8 +98,8 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Douay-Rheims Style Gothic Footer with Social & Store Links -->
-    <footer class="border-t border-archive-border bg-archive-card/90 py-8 px-4 font-mono text-xs text-archive-muted">
+    <!-- Douay-Rheims Style Gothic Footer with Social, Store & Legal Links -->
+    <footer class="border-t border-archive-border bg-archive-card/90 py-8 px-4 font-mono text-xs text-archive-muted space-y-6">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             
             <!-- Left: Brand & Copyright -->
@@ -165,6 +165,18 @@
                     </svg>
                 </a>
 
+            </div>
+        </div>
+
+        <!-- Lower Sub-Footer: Archival Legal Directives -->
+        <div class="border-t border-archive-border/50 pt-4 max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[10px] text-archive-muted gap-2">
+            <p>© 2026 The Reform School for Witches. All Rights Reserved.</p>
+            <div class="flex items-center gap-3 tracking-widest font-mono uppercase">
+                <a href="/legal/privacy" class="hover:text-amber-400 transition-colors">Privacy Policy</a>
+                <span class="text-archive-border">•</span>
+                <a href="/legal/terms" class="hover:text-amber-400 transition-colors">Terms of Service</a>
+                <span class="text-archive-border">•</span>
+                <a href="/legal/cookies" class="hover:text-amber-400 transition-colors">Cookie Policy</a>
             </div>
         </div>
     </footer>
