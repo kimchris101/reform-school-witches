@@ -7,12 +7,68 @@ from pypdf import PdfReader
 PDF_TEXT_CHUNKS: List[str] = []
 PDF_PATH = Path("app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf")
 
+# Canonical World Knowledge Base for core characters and lore entities
+CANONICAL_LORE_DATABASE = [
+    {
+        "keywords": ["father manuel", "manuel", "rector", "exorcist", "chief exorcist"],
+        "content": (
+            "Father Manuel is the Rector and Chief Exorcist of Our Lady of Tears Academy. "
+            "He speaks with theological authority, pastoral firmness, and oversees the canonical records, "
+            "Eucharistic Sacraments, and Latin Exorcism Rites. He performed Kimbra Woods' Emergency Baptism in the White Room "
+            "to sever her Sanguine tether from Damian Boudreaux."
+        )
+    },
+    {
+        "keywords": ["roman", "roman de la croix", "de la croix", "shield", "sponsor"],
+        "content": (
+            "Roman De La Croix is a Shield and Perimeter Marshal at Our Lady of Tears Academy. "
+            "Bound by sacred oath as Kimbra's Sponsor, he carries the guilt of leaving high society New Orleans "
+            "and guards the perimeter salt line against the Crimson Root."
+        )
+    },
+    {
+        "keywords": ["damian", "damian boudreaux", "crimson heir", "root", "boudreaux", "heir", "hearth"],
+        "content": (
+            "Damian Boudreaux is the Crimson Heir to the Boudreaux Empire and the Crimson Root network. "
+            "He is starving without his Hearth (Kimbra) and seeks to reclaim her through the Sanguine Law and ancestral graft tethers."
+        )
+    },
+    {
+        "keywords": ["kimbra", "kimbra woods", "mary", "vessel", "consecrated vessel"],
+        "content": (
+            "Kimberly 'Kimbra' Woods (consecrated as Mary) survived ten years as Damian Boudreaux's Hearth before escaping "
+            "to Our Lady of Tears Academy. Her emergency baptism in the White Room severed her biological graft tether."
+        )
+    },
+    {
+        "keywords": ["ignatius", "ignatius santiago", "santiago", "sentry", "penitent"],
+        "content": (
+            "Ignatius Santiago is a Penitent Sentry at Our Lady of Tears Academy. "
+            "He stands watch over the perimeter salt lines and brine moat with calm, stoic, brotherly vigilance."
+        )
+    },
+    {
+        "keywords": ["genesis", "disruptor", "scrambler"],
+        "content": (
+            "Genesis is a Tactical Disruptor and Scrambler at Our Lady of Tears Academy. "
+            "She possesses sharp Metairie wit and uses frequency signal interference technology to counter the Crimson Root's broadcast array."
+        )
+    },
+    {
+        "keywords": ["academy", "our lady of tears", "sanctuary", "salt line"],
+        "content": (
+            "Our Lady of Tears Academy is a Catholic Noir sanctuary in New Orleans protected by coarse salt lines, "
+            "sacramental barriers, and vigilant Shields defending against the parasitic Crimson Root network."
+        )
+    }
+]
+
 def initialize_pdf_lore_index():
     """Reads the PDF from app/static/downloads and slices it into compact search chunks."""
     global PDF_TEXT_CHUNKS
     
     if not PDF_PATH.exists():
-        print(f"[ LORE ENGINE ] PDF not found at {PDF_PATH}. Falling back to default registry.")
+        print(f"[ LORE ENGINE ] PDF not found at {PDF_PATH}. Utilizing canonical registry.")
         return
 
     try:
@@ -51,30 +107,44 @@ def initialize_pdf_lore_index():
 initialize_pdf_lore_index()
 
 def retrieve_lore_context(query: str) -> str:
-    """Scans manuscript chunks for matching keywords and returns a strict character-limited context."""
-    if not PDF_TEXT_CHUNKS:
-        return "No manuscript PDF loaded."
+    """
+    Scans manuscript PDF chunks and canonical world registry for matching keywords,
+    returning a rich context block.
+    """
+    query_clean = query.lower()
+    
+    # 1. First, check Canonical Knowledge Base for entity/character matches
+    canonical_matches = []
+    for entry in CANONICAL_LORE_DATABASE:
+        if any(keyword in query_clean for keyword in entry["keywords"]):
+            canonical_matches.append(entry["content"])
 
-    # Filter out common stop words to improve keyword precision
+    # 2. Extract query keywords for PDF chunk scanning
     stop_words = {"who", "what", "where", "is", "are", "the", "a", "an", "and", "or", "about", "tell", "me"}
     query_words = [w.lower() for w in re.findall(r'\w+', query) if w.lower() not in stop_words]
 
     if not query_words:
-        query_words = [query.lower()]
+        query_words = [query_clean]
 
-    matched_chunks = []
-    
-    # Match up to 2 small paragraphs
-    for chunk in PDF_TEXT_CHUNKS:
-        chunk_lower = chunk.lower()
-        if any(word in chunk_lower for word in query_words):
-            matched_chunks.append(chunk)
-            if len(matched_chunks) >= 2:
-                break
+    pdf_matches = []
+    if PDF_TEXT_CHUNKS:
+        for chunk in PDF_TEXT_CHUNKS:
+            chunk_lower = chunk.lower()
+            if any(word in chunk_lower for word in query_words):
+                pdf_matches.append(chunk)
+                if len(pdf_matches) >= 2:
+                    break
 
-    if not matched_chunks:
-        return "No specific manuscript lore matched; rely strictly on core character system prompt."
+    # 3. Combine canonical entity lore with PDF manuscript excerpts
+    all_context_blocks = canonical_matches + pdf_matches
 
-    # Hard cap the total context length to 1,000 characters (~200 tokens)
-    joined_context = "\n---\n".join(matched_chunks)
-    return joined_context[:1000]
+    if not all_context_blocks:
+        return (
+            "Our Lady of Tears Academy is a Catholic Noir sanctuary in New Orleans guarded by salt lines, "
+            "Shields like Roman De La Croix, Penitent Sentries like Ignatius Santiago, and Chief Exorcist Father Manuel. "
+            "They defend against Damian Boudreaux and the parasitic Crimson Root network."
+        )
+
+    # Combine context and enforce maximum character window (~1200 chars)
+    joined_context = "\n---\n".join(all_context_blocks)
+    return joined_context[:1200]
