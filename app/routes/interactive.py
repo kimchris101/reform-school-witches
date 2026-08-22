@@ -196,14 +196,14 @@ async def render_chat_modal(request: Request, character_id: str):
 
 @router.post("/chat/{character_id}", response_class=HTMLResponse)
 async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
-    """Live terminal chat endpoint with resilient multi-model failover."""
+    """Live terminal chat endpoint using Groq API with active production model failovers."""
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     lore_context = retrieve_lore_context(message)
     
     augmented_prompt = (
         f"{system_prompt}\n\n"
         f"LORE CONTEXT:\n{lore_context}\n\n"
-        f"INSTRUCTION: Answer directly in character in 2-3 sentences (under 80 words). Do not use bullet points or lists."
+        f"INSTRUCTION: Answer directly in character in 2-3 concise sentences (under 80 words). Do not use bullet points or lists."
     )
     
     groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
@@ -219,18 +219,18 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
             }
         )
 
-    # Active model candidates array for seamless failover
-    candidate_models = [
-        "openai/gpt-oss-20b",
+    # Active production Groq model list
+    active_models = [
+        "llama-3.3-70b-specdec",
         "llama-3.1-8b-instant",
-        "groq/openai/gpt-oss-20b",
-        "groq/llama-3.1-8b-instant"
+        "mixtral-8x7b-32768"
     ]
 
     ai_response = ""
+    error_details = ""
     
-    async with httpx.AsyncClient(timeout=12.0) as http_client:
-        for model_id in candidate_models:
+    async with httpx.AsyncClient(timeout=18.0) as http_client:
+        for model_id in active_models:
             try:
                 response = await http_client.post(
                     "https://api.groq.com/openai/v1/chat/completions",
@@ -255,11 +255,17 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                     if content:
                         ai_response = content
                         break
-            except Exception:
+                else:
+                    error_details = f"Status {response.status_code}: {response.text}"
+                    print(f"[GROQ MODEL FAILOVER] {model_id} returned: {error_details}")
+
+            except Exception as err:
+                error_details = str(err)
+                print(f"[GROQ EXCEPTION] {model_id} failed: {err}")
                 continue
 
     if not ai_response:
-        ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Terminal frequency disruption. Please resend."
+        ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Frequency disruption ({error_details}). Please resend."
 
     return templates.TemplateResponse(
         request=request,
