@@ -11,7 +11,7 @@ from app.services.email import send_diocesan_assessment_email
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# In-memory store for email verification tokens
+# In-memory store mapping token -> email
 VERIFICATION_TOKENS: dict[str, str] = {}
 
 
@@ -42,7 +42,7 @@ async def evaluate_intake_submission(
     q4: str = Form(...),
     q5: str = Form(...)
 ):
-    """Processes intake choices via HTMX, sets member cookie, triggers email delivery, and returns the result."""
+    """Processes intake choices, sends verification email, and renders pending verification view."""
     clean_email = user_email.strip().lower()
     clean_alias = user_alias.strip()
 
@@ -66,52 +66,50 @@ async def evaluate_intake_submission(
             detail=f"Invalid diagnostic submission: {err.errors()}"
         )
 
-    # Calculate result & generate letter payload
+    # 1. Calculate diagnostic result
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
 
-    # Convert Pydantic letter model to a safe primitive dict/object for background task serialization
+    # 2. Convert Pydantic object to dictionary
     if hasattr(result.diocesan_letter, "model_dump"):
-        letter_data = result.diocesan_letter.model_dump()
+        letter_dict = result.diocesan_letter.model_dump()
     elif hasattr(result.diocesan_letter, "dict"):
-        letter_data = result.diocesan_letter.dict()
+        letter_dict = result.diocesan_letter.dict()
     else:
-        letter_data = result.diocesan_letter
+        letter_dict = result.diocesan_letter
 
-    archetype_str = str(result.archetype.value if hasattr(result.archetype, 'value') else result.archetype)
+    archetype_title = str(result.archetype.value if hasattr(result.archetype, 'value') else result.archetype)
 
-    # Generate a verification token for email activation link
-    verify_token = secrets.token_urlsafe(16)
+    # 3. Generate verification token and link
+    verify_token = secrets.token_urlsafe(24)
     VERIFICATION_TOKENS[verify_token] = clean_email
 
-    # Queue background task using primitive data types to prevent serialization failures
+    base_url = str(request.base_url).rstrip("/")
+    verify_url = f"{base_url}/intake/verify?token={verify_token}"
+
+    # 4. Queue background email dispatch with verification link
     background_tasks.add_task(
         send_diocesan_assessment_email,
         recipient_email=submission.user_email,
         recipient_alias=submission.user_alias,
-        archetype_title=archetype_str,
-        letter_obj=letter_data
+        archetype_title=archetype_title,
+        letter_obj=letter_dict,
+        verify_url=verify_url
     )
 
+    # 5. Render result page informing user to check their email to verify
     resp = templates.TemplateResponse(
         request=request,
         name="components/diocesan_letter.html",
         context={
             "letter": result.diocesan_letter,
             "user_email": submission.user_email,
-            "verify_token": verify_token
+            "is_verified": False
         }
     )
 
-    # Set authentication cookie globally across all site routes ('/')
-    resp.set_cookie(
-        key="rsfw_member_token",
-        value=f"initiate_{clean_email}",
-        path="/",
-        samesite="lax",
-        max_age=2592000
-    )
+    # NOTE: NO MEMBER COOKIE IS SET HERE.
+    # Access remains locked until they click the link in their email.
 
-    # Trigger Sacramental Bond cutscene automatically for Co-Link results
     if result.archetype in (ArchetypeEnum.CO_LINK_PARTNER, "The Co-Link Partner"):
         resp.headers["HX-Trigger"] = "launchCoLinkCutscene"
 
@@ -120,12 +118,20 @@ async def evaluate_intake_submission(
 
 @router.get("/verify", response_class=HTMLResponse)
 async def verify_email_token(request: Request, token: str):
-    """Verifies email link from Brevo dispatch and sets permanent member cookie."""
+    """Validates verification link from email and grants member access cookie."""
     email = VERIFICATION_TOKENS.get(token)
     
     if not email:
-        return RedirectResponse(url="/intake/", status_code=status.HTTP_303_SEE_OTHER)
+        return templates.TemplateResponse(
+            request=request,
+            name="pages/intake_required.html",
+            context={
+                "page_title": "Verification Token Expired | Our Lady of Tears",
+                "meta_description": "The diocesan verification link is invalid or expired."
+            }
+        )
 
+    # Set permanent member clearance cookie upon clicking email link
     response = RedirectResponse(url="/interactive/", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(
         key="rsfw_member_token",
@@ -134,5 +140,6 @@ async def verify_email_token(request: Request, token: str):
         samesite="lax",
         max_age=2592000
     )
+    # Token consumed
     VERIFICATION_TOKENS.pop(token, None)
     return response
