@@ -13,7 +13,7 @@ CANONICAL_LORE_DATABASE = [
         "keywords": ["father manuel", "manuel", "rector", "exorcist", "chief exorcist"],
         "content": (
             "Father Manuel is the Rector and Chief Exorcist of Our Lady of Tears Academy. "
-            "He speaks with theological authority, pastoral firmness, and oversees the canonical records, "
+            "He speaks with theological authority, pastoral firmness, and oversees canonical records, "
             "Eucharistic Sacraments, and Latin Exorcism Rites. He performed Kimbra Woods' Emergency Baptism in the White Room "
             "to sever her Sanguine tether from Damian Boudreaux."
         )
@@ -22,36 +22,37 @@ CANONICAL_LORE_DATABASE = [
         "keywords": ["roman", "roman de la croix", "de la croix", "shield", "sponsor"],
         "content": (
             "Roman De La Croix is a Shield and Perimeter Marshal at Our Lady of Tears Academy. "
-            "Bound by sacred oath as Kimbra's Sponsor, he carries the guilt of leaving high society New Orleans "
+            "Roman IS Kimbra's sacred Sponsor. Roman carries the guilt of leaving high society New Orleans "
             "and guards the perimeter salt line against the Crimson Root."
-        )
-    },
-    {
-        "keywords": ["damian", "damian boudreaux", "crimson heir", "root", "boudreaux", "heir", "hearth"],
-        "content": (
-            "Damian Boudreaux is the Crimson Heir to the Boudreaux Empire and the Crimson Root network. "
-            "He is starving without his Hearth (Kimbra) and seeks to reclaim her through the Sanguine Law and ancestral graft tethers."
-        )
-    },
-    {
-        "keywords": ["kimbra", "kimbra woods", "mary", "vessel", "consecrated vessel"],
-        "content": (
-            "Kimberly 'Kimbra' Woods (consecrated as Mary) survived ten years as Damian Boudreaux's Hearth before escaping "
-            "to Our Lady of Tears Academy. Her emergency baptism in the White Room severed her biological graft tether."
         )
     },
     {
         "keywords": ["ignatius", "ignatius santiago", "santiago", "sentry", "penitent"],
         "content": (
             "Ignatius Santiago is a Penitent Sentry at Our Lady of Tears Academy. "
-            "He stands watch over the perimeter salt lines and brine moat with calm, stoic, brotherly vigilance."
+            "He stands watch over the perimeter salt lines and brine moat with calm, stoic vigilance. "
+            "Ignatius is NOT Kimbra's Sponsor (Roman De La Croix is her Sponsor)."
+        )
+    },
+    {
+        "keywords": ["damian", "damian boudreaux", "crimson heir", "root", "boudreaux", "heir", "hearth"],
+        "content": (
+            "Damian Boudreaux is the Crimson Heir to the Boudreaux Empire and the Crimson Root network. "
+            "He seeks to reclaim Kimbra through the Sanguine Law and ancestral tethers."
+        )
+    },
+    {
+        "keywords": ["kimbra", "kimbra woods", "mary", "vessel", "consecrated vessel"],
+        "content": (
+            "Kimberly 'Kimbra' Woods (consecrated as Mary) survived ten years as Damian Boudreaux's Hearth before escaping "
+            "to Our Lady of Tears Academy. Roman De La Croix is her Sponsor."
         )
     },
     {
         "keywords": ["genesis", "disruptor", "scrambler"],
         "content": (
             "Genesis is a Tactical Disruptor and Scrambler at Our Lady of Tears Academy. "
-            "She possesses sharp Metairie wit and uses frequency signal interference technology to counter the Crimson Root's broadcast array."
+            "She uses frequency signal interference technology to counter the Crimson Root's broadcast array."
         )
     },
     {
