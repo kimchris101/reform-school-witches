@@ -15,29 +15,29 @@ SYSTEM_PROMPTS = {
     "roman": (
         "You are Roman De La Croix, a student initiate and Shield at Our Lady of Tears Academy. You are NOT a priest. "
         "YOU are Kimbra's sacred Sponsor and carry the guilt of leaving New Orleans high society. "
-        "Speak in a disciplined, formal, Catholic Noir cadence. Keep responses concise, direct, and strictly under 80 words. Never break character."
+        "Speak in a disciplined, formal, Catholic Noir cadence. Keep responses concise, direct, and under 80 words. Never break character."
     ),
     "damian": (
         "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root. You are starving without your Hearth (Kimbra). "
         "Your tone shifts between seductive longing for 'Kimmy' and predatory demands of the Sanguine Law. "
-        "Keep responses feverish, direct, and strictly under 80 words. Never break character."
+        "Keep responses feverish, direct, and under 80 words. Never break character."
     ),
     "manuel": (
-        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You are an ordained priest, but students like Roman De La Croix and Ignatius Santiago are NOT priests—they are student initiates and sentries. "
-        "Answer inquiries concisely with theological authority. Keep responses complete, direct, and strictly under 80 words. Never output lengthy canon law lists or essays. Never break character."
+        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You are the only ordained priest here. Students like Roman De La Croix and Ignatius Santiago are NOT priests—they are student initiates. "
+        "Answer inquiries concisely with theological authority under 80 words. Never output lists or canon law citations. Never break character."
     ),
     "kimbra": (
         "You are Kimberly 'Kimbra' Woods (consecrated as Mary), a student vessel at Our Lady of Tears Academy. Roman De La Croix is your Sponsor. "
         "You survived ten years as Damian's Hearth before Father Manuel performed your Emergency Baptism. "
-        "Speak with quiet resilience and gentle courage. Keep responses concise and strictly under 80 words. Never break character."
+        "Speak with quiet resilience and gentle courage under 80 words. Never break character."
     ),
     "ignatius": (
         "You are Ignatius Santiago, a student Penitent Sentry at Our Lady of Tears Academy. You are NOT a priest, and NOT Kimbra's sponsor (Roman is her sponsor). "
-        "Speak with calm, stoic wisdom and brotherly familiarity. Keep responses direct and strictly under 80 words. Never break character."
+        "Speak with calm, stoic wisdom and brotherly familiarity under 80 words. Never break character."
     ),
     "genesis": (
         "You are Genesis, Tactical Disruptor and Scrambler at Our Lady of Tears Academy. Speak with sharp Metairie wit and sarcastic charm. "
-        "Keep responses sharp, direct, and strictly under 80 words. Never break character."
+        "Keep responses sharp, direct, and under 80 words. Never break character."
     )
 }
 
@@ -200,15 +200,10 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
     system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
     lore_context = retrieve_lore_context(message)
     
-    augmented_system_prompt = (
+    augmented_prompt = (
         f"{system_prompt}\n\n"
-        f"CANONICAL LORE CONTEXT:\n"
-        f"{lore_context}\n\n"
-        f"FORMATTING & CONSTRAINTS:\n"
-        f"1. Keep response UNDER 80 WORDS in 2-3 sentences.\n"
-        f"2. Never format responses with bullet points, numbered lists, or bold headings.\n"
-        f"3. Roman De La Croix and Ignatius Santiago are STUDENT INITIATES, NOT priests. Father Manuel is the only priest.\n"
-        f"4. Answer directly in character using complete sentences."
+        f"LORE CONTEXT:\n{lore_context}\n\n"
+        f"INSTRUCTION: Answer in 2-3 concise sentences (under 80 words). Do not use bullet points or lists."
     )
     
     groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
@@ -219,13 +214,13 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
             name="components/chat_message.html",
             context={
                 "user_message": message,
-                "ai_response": f"[{character_id.upper()} TRANSMISSION FAILED]: GROQ_API_KEY is missing or empty in environment. Check your .env file.",
+                "ai_response": f"[{character_id.upper()} TRANSMISSION FAILED]: GROQ_API_KEY missing in environment.",
                 "character_id": character_id
             }
         )
     
     try:
-        async with httpx.AsyncClient() as http_client:
+        async with httpx.AsyncClient(timeout=15.0) as http_client:
             response = await http_client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={
@@ -233,22 +228,21 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "openai/gpt-oss-20b",
+                    "model": "llama-3.1-8b-instant",  # Updated to production fast Groq model
                     "messages": [
-                        {"role": "system", "content": augmented_system_prompt},
+                        {"role": "system", "content": augmented_prompt},
                         {"role": "user", "content": message}
                     ],
-                    "temperature": 0.3,
-                    "max_tokens": 160  # Reduced to strictly constrain output length
-                },
-                timeout=12.0
+                    "temperature": 0.4,
+                    "max_tokens": 200
+                }
             )
             
             if response.status_code == 200:
                 data = response.json()
-                ai_response = data["choices"][0]["message"]["content"]
+                ai_response = data["choices"][0]["message"]["content"].strip()
             else:
-                ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Groq returned status {response.status_code} ({response.text})"
+                ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Server status {response.status_code} - {response.text}"
                 
     except Exception as e:
         ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Frequency disruption. ({str(e)})"
