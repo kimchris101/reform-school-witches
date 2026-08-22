@@ -11,7 +11,7 @@ from app.services.email import send_diocesan_assessment_email
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# In-memory store mapping token -> email
+# In-memory store for verification tokens (token -> email)
 VERIFICATION_TOKENS: dict[str, str] = {}
 
 
@@ -42,7 +42,7 @@ async def evaluate_intake_submission(
     q4: str = Form(...),
     q5: str = Form(...)
 ):
-    """Processes intake choices, sends verification email, and renders pending verification view."""
+    """Processes intake choices, sends verification email, and keeps member clearance locked until verified."""
     clean_email = user_email.strip().lower()
     clean_alias = user_alias.strip()
 
@@ -69,7 +69,7 @@ async def evaluate_intake_submission(
     # 1. Calculate diagnostic result
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
 
-    # 2. Convert Pydantic object to dictionary
+    # 2. Convert Pydantic object to dict for background task compatibility
     if hasattr(result.diocesan_letter, "model_dump"):
         letter_dict = result.diocesan_letter.model_dump()
     elif hasattr(result.diocesan_letter, "dict"):
@@ -79,14 +79,14 @@ async def evaluate_intake_submission(
 
     archetype_title = str(result.archetype.value if hasattr(result.archetype, 'value') else result.archetype)
 
-    # 3. Generate verification token and link
+    # 3. Generate verification token and link string
     verify_token = secrets.token_urlsafe(24)
     VERIFICATION_TOKENS[verify_token] = clean_email
 
-    base_url = str(request.base_url).rstrip("/")
-    verify_url = f"{base_url}/intake/verify?token={verify_token}"
+    base_domain = str(request.base_url).rstrip("/")
+    verify_url = f"{base_domain}/intake/verify?token={verify_token}"
 
-    # 4. Queue background email dispatch with verification link
+    # 4. Queue background task
     background_tasks.add_task(
         send_diocesan_assessment_email,
         recipient_email=submission.user_email,
@@ -96,7 +96,7 @@ async def evaluate_intake_submission(
         verify_url=verify_url
     )
 
-    # 5. Render result page informing user to check their email to verify
+    # 5. Render result view prompting user to check email
     resp = templates.TemplateResponse(
         request=request,
         name="components/diocesan_letter.html",
@@ -107,8 +107,7 @@ async def evaluate_intake_submission(
         }
     )
 
-    # NOTE: NO MEMBER COOKIE IS SET HERE.
-    # Access remains locked until they click the link in their email.
+    # NO MEMBER COOKIE IS SET HERE (Guarantees double opt-in verification)
 
     if result.archetype in (ArchetypeEnum.CO_LINK_PARTNER, "The Co-Link Partner"):
         resp.headers["HX-Trigger"] = "launchCoLinkCutscene"
@@ -118,7 +117,7 @@ async def evaluate_intake_submission(
 
 @router.get("/verify", response_class=HTMLResponse)
 async def verify_email_token(request: Request, token: str):
-    """Validates verification link from email and grants member access cookie."""
+    """Validates verification link from Brevo email and grants permanent member access cookie."""
     email = VERIFICATION_TOKENS.get(token)
     
     if not email:
@@ -126,7 +125,7 @@ async def verify_email_token(request: Request, token: str):
             request=request,
             name="pages/intake_required.html",
             context={
-                "page_title": "Verification Token Expired | Our Lady of Tears",
+                "page_title": "Verification Link Expired | Our Lady of Tears",
                 "meta_description": "The diocesan verification link is invalid or expired."
             }
         )
