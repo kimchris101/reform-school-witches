@@ -3,7 +3,7 @@
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-blood-900/40 pb-4 mb-4">
             <h3 class="font-mono text-xs text-amber-400 uppercase tracking-[0.2em] font-bold">
-                [ MANUSCRIPT ARCHIVE INDEX :: {{ character_name }} ]
+                [ ARCHIVAL LORE INDEX :: {{ character_name }} RECORDS ]
             </h3>
             <button onclick="document.getElementById('modal-container').remove()" class="text-archive-muted hover:text-blood-500 font-mono text-xs uppercase transition-colors">
                 ✕ CLOSE
@@ -13,8 +13,8 @@
         <!-- Excerpt Search Log Container -->
         <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 min-h-[250px]">
             <div class="bg-black/60 border border-blood-900/30 p-4 rounded-sm text-xs font-mono text-archive-muted leading-relaxed">
-                [ MANUSCRIPT INDEX CONNECTED ]<br>
-                Type a subject, character name, or phrase below to scan Book I: The Blood Lily Contract for verbatim excerpts.
+                [ MANUSCRIPT ARCHIVE ACTIVE ]<br>
+                Submit a subject, character, or key term to search Book I: The Blood Lily Contract for official canonical excerpts regarding {{ character_name }}.
             </div>
         </div>
 
@@ -26,12 +26,12 @@
               class="flex gap-2 border-t border-blood-900/40 pt-4">
             <input type="text" 
                    name="query" 
-                   placeholder="Search manuscript index (e.g. Father Manuel, Salt Line)..." 
+                   placeholder="Query archival records (e.g., Father Manuel, Salt Line, Sponsor)..." 
                    required 
                    class="flex-1 bg-black/80 border border-blood-900/60 text-parchment-100 px-4 py-2.5 font-mono text-xs focus:outline-none focus:border-blood-500">
             <button type="submit" 
                     class="bg-blood-900 hover:bg-blood-800 text-parchment-100 font-mono text-xs uppercase px-5 py-2.5 tracking-wider font-bold transition-colors">
-                SEARCH
+                CONSULT
             </button>
         </form>
     </div>
