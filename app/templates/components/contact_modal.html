@@ -1,0 +1,57 @@
+<div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+    <div class="bg-archive-card border border-blood-900/60 w-full max-w-lg p-6 rounded shadow-[0_0_50px_rgba(163,15,46,0.25)] flex flex-col font-mono text-xs">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-blood-900/40 pb-3 mb-4">
+            <h3 class="text-amber-400 uppercase tracking-widest font-bold flex items-center gap-2">
+                ✉ [ TRANSMIT DIRECTIVE :: REGISTRAR ]
+            </h3>
+            <button onclick="document.getElementById('modal-container').remove()" class="text-archive-muted hover:text-blood-500 uppercase transition-colors">
+                ✕ CLOSE
+            </button>
+        </div>
+
+        <!-- Form Container -->
+        <div id="contact-form-container">
+            <p class="text-[11px] text-archive-muted mb-4 leading-relaxed">
+                Submissions are dispatched directly to <span class="text-blood-400">hello@redcandledigital.io</span>.
+            </p>
+
+            <form hx-post="/legal/contact-send" 
+                  hx-target="#contact-form-container" 
+                  hx-swap="innerHTML" 
+                  class="space-y-3">
+                
+                <div>
+                    <label class="block text-archive-muted uppercase tracking-wider text-[10px] mb-1">Your Name</label>
+                    <input type="text" name="name" required placeholder="Initiate Name"
+                           class="w-full bg-black/80 border border-blood-900/60 text-parchment-100 px-3 py-2 focus:outline-none focus:border-blood-500">
+                </div>
+
+                <div>
+                    <label class="block text-archive-muted uppercase tracking-wider text-[10px] mb-1">Email Address</label>
+                    <input type="email" name="email" required placeholder="your.email@domain.com"
+                           class="w-full bg-black/80 border border-blood-900/60 text-parchment-100 px-3 py-2 focus:outline-none focus:border-blood-500">
+                </div>
+
+                <div>
+                    <label class="block text-archive-muted uppercase tracking-wider text-[10px] mb-1">Subject</label>
+                    <input type="text" name="subject" required placeholder="Inquiry / Media / Rights"
+                           class="w-full bg-black/80 border border-blood-900/60 text-parchment-100 px-3 py-2 focus:outline-none focus:border-blood-500">
+                </div>
+
+                <div>
+                    <label class="block text-archive-muted uppercase tracking-wider text-[10px] mb-1">Message</label>
+                    <textarea name="message" rows="4" required placeholder="Write your transmission..."
+                              class="w-full bg-black/80 border border-blood-900/60 text-parchment-100 px-3 py-2 focus:outline-none focus:border-blood-500 font-serif text-sm"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-blood-900 hover:bg-blood-800 text-parchment-100 px-5 py-2.5 uppercase tracking-wider font-bold transition-colors">
+                        DISPATCH TRANSMISSION
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
