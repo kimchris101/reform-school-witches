@@ -33,25 +33,20 @@
         </p>
     </div>
 
-    <!-- Authentication Clearance Notification -->
-    <div class="mt-6 bg-blood-900/10 border border-blood-900/40 p-4 text-center space-y-1 font-mono text-xs">
-        <span class="text-blood-900 font-bold uppercase tracking-wider block">
-            ✝ DIOCESAN CLEARANCE ISSUED
+    <!-- Verification Pending Notice -->
+    <div class="mt-6 bg-blood-900/10 border border-blood-900/40 p-5 text-center space-y-2 font-mono text-xs">
+        <span class="text-blood-900 font-bold uppercase tracking-wider block flex items-center justify-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-blood-600 animate-ping"></span>
+            ✉ VERIFICATION REQUIRED: CHECK YOUR INBOX
         </span>
         <p class="text-archive-bg/80 font-serif text-xs italic">
-            A copy of this seal has been dispatched to <strong>{{ user_email }}</strong>. Your email is now authenticated across all interactive channels.
+            A verification link has been dispatched to <strong>{{ user_email }}</strong>. You must click the verification link in your email to authenticate your identity and unlock access to the Interactive Script Engine and Vault.
         </p>
     </div>
 
     <!-- Actions / Next Steps -->
     <div class="mt-6 pt-6 border-t border-blood-900/30 text-center space-y-4 font-mono text-xs">
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/interactive" class="bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic px-6 py-3.5 text-xs uppercase tracking-widest transition-colors font-bold border border-blood-950 shadow-md">
-                ✝ Enter Interactive Engine
-            </a>
-            <a href="/vault" class="bg-archive-bg hover:bg-archive-card text-parchment-100 font-gothic px-6 py-3.5 text-xs uppercase tracking-widest transition-colors font-bold border border-archive-border shadow-md">
-                [ Access Vault Archives ]
-            </a>
             <a href="/dossiers" class="bg-blood-900/20 hover:bg-blood-900/30 text-archive-bg font-gothic px-6 py-3.5 text-xs uppercase tracking-widest transition-colors font-bold border border-blood-900/40">
                 Inspect Dossiers
             </a>
