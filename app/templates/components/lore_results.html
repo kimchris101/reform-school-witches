@@ -1,0 +1,33 @@
+<div class="space-y-4 font-serif text-sm sm:text-base animate-fade-in my-4">
+    <!-- User Search Query -->
+    <div class="flex flex-col items-end space-y-1">
+        <span class="font-mono text-[11px] text-amber-400 uppercase tracking-widest font-bold">
+            [ MANUSCRIPT INDEX QUERY ]
+        </span>
+        <div class="bg-black/80 border border-archive-border text-parchment-100 p-3 rounded-sm">
+            "{{ query }}"
+        </div>
+    </div>
+
+    <!-- Direct Manuscript Excerpts -->
+    <div class="flex flex-col items-start space-y-2">
+        <span class="font-mono text-[11px] text-blood-500 uppercase tracking-widest font-bold">
+            [ ARCHIVAL MANUSCRIPT EXCERPTS ]
+        </span>
+
+        {% if excerpts %}
+            {% for excerpt in excerpts %}
+            <div class="bg-blood-950/40 border border-blood-900/80 text-parchment-100 p-4 rounded-sm max-w-2xl font-serif italic leading-relaxed shadow-lg space-y-2">
+                <p>"{{ excerpt.text }}"</p>
+                <div class="font-mono text-[10px] text-blood-400 uppercase tracking-wider text-right border-t border-blood-900/40 pt-1">
+                    Book I: The Blood Lily Contract • Page {{ excerpt.page }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-blood-950/20 border border-blood-900/40 text-archive-muted p-4 rounded-sm font-mono text-xs italic">
+                [ NO DIRECT MATCHES FOUND IN BOOK I MANUSCRIPT ]
+            </div>
+        {% endif %}
+    </div>
+</div>
