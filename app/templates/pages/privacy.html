@@ -10,28 +10,33 @@
 
     <div class="space-y-6 text-sm leading-relaxed">
         <section class="space-y-2">
-            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">1. Overview & Zero-Database Architecture</h2>
-            <p>The Reform School for Witches ("RSFW", "we", "our") respects visitor privacy. Our interactive script engine operates on a zero-database, stateless architecture. We do not maintain server-side user accounts, tracking profiles, or personal identity databases.</p>
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">1. Data Storage & Supabase Architecture</h2>
+            <p>The Reform School for Witches ("RSFW", "we", "our") respects visitor privacy. We utilize Supabase—a cloud-hosted PostgreSQL database platform—for secure data storage, account authentication, and diagnostic intake exam processing. Any data submitted during intake registration or member authentication is encrypted in transit and stored securely within our private Supabase database infrastructure.</p>
         </section>
 
         <section class="space-y-2">
-            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">2. Data Collection & Cookies</h2>
-            <p>We do not collect personal identifying information (PII) without explicit intake registration. To maintain game state across session choices, we utilize essential client-side HTTP cookies:</p>
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">2. Local Browser Cookies & Game State</h2>
+            <p>In addition to server-side database storage, we utilize essential client-side HTTP cookies to maintain real-time interactive game states in your browser without requiring constant database roundtrips. Essential cookies set by this domain include:</p>
             <ul class="list-disc list-inside font-mono text-xs text-archive-muted space-y-1 pl-2">
-                <li><strong class="text-parchment-200">rsfw_member_token:</strong> Validates intake exam authorization.</li>
-                <li><strong class="text-parchment-200">sanctity:</strong> Tracks progress metric delta (0-100%).</li>
-                <li><strong class="text-parchment-200">corruption:</strong> Tracks progress metric delta (0-100%).</li>
+                <li><strong class="text-parchment-200">rsfw_member_token:</strong> Validates intake clearance and authorization status.</li>
+                <li><strong class="text-parchment-200">sanctity:</strong> Tracks progress metric delta (0–100%) during interactive choices.</li>
+                <li><strong class="text-parchment-200">corruption:</strong> Tracks progress metric delta (0–100%) during interactive choices.</li>
             </ul>
         </section>
 
         <section class="space-y-2">
-            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">3. Local PDF & Manuscript Queries</h2>
-            <p>Queries submitted via the Archival Index are processed locally on the server against indexed manuscript files. Queries are not transmitted to third-party artificial intelligence services or external advertisers.</p>
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">3. Local Manuscript Queries</h2>
+            <p>Search queries submitted via the Archival Index are processed locally on our application server against indexed manuscript files. Search queries are not logged for advertising purposes, nor are they transmitted to third-party artificial intelligence platforms.</p>
         </section>
 
         <section class="space-y-2">
-            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">4. Contact & Inquiries</h2>
-            <p>For questions regarding our privacy directives or archival compliance, contact the Academy Registrar at <span class="font-mono text-blood-400">admin@reformschoolforwitches.com</span>.</p>
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">4. Third-Party Sharing & Telemetry</h2>
+            <p>We do not sell, rent, or monetize your personal information or diagnostic exam responses. Information stored in our Supabase database is strictly used to deliver core application functionality, access control, and user session management.</p>
+        </section>
+
+        <section class="space-y-2">
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">5. Contact & Inquiries</h2>
+            <p>For questions regarding our privacy directives, data deletion requests, or archival compliance, contact our founders at <span class="font-mono text-blood-400">info@redcandledigital.io.com</span>.</p>
         </section>
     </div>
 </div>
