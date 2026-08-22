@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12 font-serif text-parchment-100 space-y-8">
+    <div class="border-b border-blood-900/60 pb-6">
+        <span class="font-mono text-xs text-amber-400 uppercase tracking-widest font-bold">[ ARCHIVAL DIRECTIVE 002 ]</span>
+        <h1 class="text-3xl font-bold font-mono text-blood-500 uppercase tracking-wider mt-2">Cookie Policy</h1>
+        <p class="font-mono text-xs text-archive-muted mt-1">Effective Date: August 2026</p>
+    </div>
+
+    <div class="space-y-6 text-sm leading-relaxed">
+        <section class="space-y-2">
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">1. How We Use Cookies</h2>
+            <p>The Reform School for Witches ("RSFW") uses essential HTTP cookies to deliver core interactive visual novel functionality. Because our portal runs on a zero-database architecture, cookies are required to store your game progress and session authorization locally on your device.</p>
+        </section>
+
+        <section class="space-y-2">
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">2. Essential Cookies We Set</h2>
+            <div class="bg-archive-card border border-archive-border rounded p-4 font-mono text-xs space-y-3">
+                <div class="border-b border-archive-border/60 pb-2">
+                    <span class="text-blood-500 font-bold">rsfw_member_token</span>
+                    <p class="text-archive-muted text-[11px] mt-0.5">Authenticates that you have completed the Intake Exam and grants access to the interactive Script Engine.</p>
+                </div>
+                <div class="border-b border-archive-border/60 pb-2">
+                    <span class="text-amber-400 font-bold">sanctity</span>
+                    <p class="text-archive-muted text-[11px] mt-0.5">Stores your current Sanctity alignment percentage (0–100%) based on your choices in the story engine.</p>
+                </div>
+                <div>
+                    <span class="text-blood-500 font-bold">corruption</span>
+                    <p class="text-archive-muted text-[11px] mt-0.5">Stores your current Corruption alignment percentage (0–100%) based on your choices in the story engine.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-2">
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">3. Third-Party & Advertising Cookies</h2>
+            <p>We <strong class="text-parchment-100">do not</strong> use third-party tracking pixels, advertising cookies, or cross-site telemetry services. All cookies set by this domain are strictly first-party and essential for gameplay.</p>
+        </section>
+
+        <section class="space-y-2">
+            <h2 class="font-mono text-base text-amber-400 uppercase tracking-wide font-bold">4. Managing Your Cookies</h2>
+            <p>You can clear or block cookies at any time via your browser settings. Please note that clearing cookies will reset your active story choices, Sanctity/Corruption metrics, and Diagnostic clearance.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}
