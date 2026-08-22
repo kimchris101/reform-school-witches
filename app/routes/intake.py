@@ -1,5 +1,6 @@
+import secrets
 from fastapi import APIRouter, Request, Form, HTTPException, status, BackgroundTasks
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 
@@ -9,6 +10,9 @@ from app.services.email import send_diocesan_assessment_email
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+# In-memory store for email verification tokens
+VERIFICATION_TOKENS: dict[str, str] = {}
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -39,6 +43,9 @@ async def evaluate_intake_submission(
     q5: str = Form(...)
 ):
     """Processes intake choices via HTMX, sets member cookie, triggers email delivery, and returns the result."""
+    clean_email = user_email.strip().lower()
+    clean_alias = user_alias.strip()
+
     try:
         answers = [
             QuizAnswer(question_id=1, selected_option=q1),
@@ -49,8 +56,8 @@ async def evaluate_intake_submission(
         ]
         
         submission = QuizSubmission(
-            user_email=user_email,
-            user_alias=user_alias,
+            user_email=clean_email,
+            user_alias=clean_alias,
             answers=answers
         )
     except ValidationError as err:
@@ -62,13 +69,27 @@ async def evaluate_intake_submission(
     # Calculate result & generate letter payload
     result = evaluate_intake_exam(submission.user_alias, submission.answers)
 
-    # Queue background task to send the styled email via Brevo API using letter_obj
+    # Convert Pydantic letter model to a safe primitive dict/object for background task serialization
+    if hasattr(result.diocesan_letter, "model_dump"):
+        letter_data = result.diocesan_letter.model_dump()
+    elif hasattr(result.diocesan_letter, "dict"):
+        letter_data = result.diocesan_letter.dict()
+    else:
+        letter_data = result.diocesan_letter
+
+    archetype_str = str(result.archetype.value if hasattr(result.archetype, 'value') else result.archetype)
+
+    # Generate a verification token for email activation link
+    verify_token = secrets.token_urlsafe(16)
+    VERIFICATION_TOKENS[verify_token] = clean_email
+
+    # Queue background task using primitive data types to prevent serialization failures
     background_tasks.add_task(
         send_diocesan_assessment_email,
         recipient_email=submission.user_email,
         recipient_alias=submission.user_alias,
-        archetype_title=str(result.archetype),
-        letter_obj=result.diocesan_letter
+        archetype_title=archetype_str,
+        letter_obj=letter_data
     )
 
     resp = templates.TemplateResponse(
@@ -76,14 +97,15 @@ async def evaluate_intake_submission(
         name="components/diocesan_letter.html",
         context={
             "letter": result.diocesan_letter,
-            "user_email": submission.user_email
+            "user_email": submission.user_email,
+            "verify_token": verify_token
         }
     )
 
-    # AUTHENTICATION LOCK FIX: Set member cookie globally on intake completion
+    # Set authentication cookie globally across all site routes ('/')
     resp.set_cookie(
         key="rsfw_member_token",
-        value=f"initiate_{submission.user_email}",
+        value=f"initiate_{clean_email}",
         path="/",
         samesite="lax",
         max_age=2592000
@@ -94,3 +116,23 @@ async def evaluate_intake_submission(
         resp.headers["HX-Trigger"] = "launchCoLinkCutscene"
 
     return resp
+
+
+@router.get("/verify", response_class=HTMLResponse)
+async def verify_email_token(request: Request, token: str):
+    """Verifies email link from Brevo dispatch and sets permanent member cookie."""
+    email = VERIFICATION_TOKENS.get(token)
+    
+    if not email:
+        return RedirectResponse(url="/intake/", status_code=status.HTTP_303_SEE_OTHER)
+
+    response = RedirectResponse(url="/interactive/", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(
+        key="rsfw_member_token",
+        value=f"initiate_{email}",
+        path="/",
+        samesite="lax",
+        max_age=2592000
+    )
+    VERIFICATION_TOKENS.pop(token, None)
+    return response
