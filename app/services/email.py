@@ -13,15 +13,15 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL", "admin@anomik.io").strip()
 SENDER_NAME = os.getenv("SENDER_NAME", "Our Lady of Tears Academy").strip()
 
 
-async def send_diocesan_assessment_email(
+def send_diocesan_assessment_email(
     recipient_email: str,
     recipient_alias: str,
     archetype_title: str,
     letter_obj: object
 ) -> bool:
-    """Dispatches a beautifully formatted Diocesan Assessment Letter via Brevo REST API."""
+    """Dispatches a Diocesan Assessment Letter via Brevo REST API in background tasks."""
     if not BREVO_API_KEY:
-        logger.error("BREVO_API_KEY is missing. Skipping email dispatch.")
+        logger.error("[BREVO ERROR]: BREVO_API_KEY is missing from environment. Skipping email dispatch.")
         return False
 
     headers = {
@@ -30,14 +30,20 @@ async def send_diocesan_assessment_email(
         "content-type": "application/json"
     }
 
-    # Extract fields safely from Pydantic DiocesanLetter or fallback to attributes
-    classification = getattr(letter_obj, "classification_class", "Academy Initiate")
-    patron = getattr(letter_obj, "patron_example", "St. Michael the Archangel")
-    summary = getattr(letter_obj, "file_summary", "Record pending classification.")
-    warning = getattr(letter_obj, "warning_notice", "Maintain spiritual vigilance.")
-    seal_code = getattr(letter_obj, "diocesan_seal_code", "OLT-ARCHIVE-RESTRICTED")
+    # Helper function to extract properties from both dicts and Pydantic objects safely
+    def get_val(obj, key, default):
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
 
-    # Beautiful Dark Academia Email Layout
+    # Extract fields safely
+    classification = get_val(letter_obj, "classification_class", "Academy Initiate")
+    patron = get_val(letter_obj, "patron_example", "St. Michael the Archangel")
+    summary = get_val(letter_obj, "file_summary", "Record pending classification.")
+    warning = get_val(letter_obj, "warning_notice", "Maintain spiritual vigilance.")
+    seal_code = get_val(letter_obj, "diocesan_seal_code", "OLT-ARCHIVE-RESTRICTED")
+
+    # Dark Academia Email Template
     full_html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -187,16 +193,16 @@ async def send_diocesan_assessment_email(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(BREVO_API_URL, headers=headers, json=payload)
+        with httpx.Client(timeout=10.0) as client:
+            response = client.post(BREVO_API_URL, headers=headers, json=payload)
             
             if response.status_code in (200, 201, 202):
-                logger.info(f"Diocesan Assessment email dispatched successfully to {recipient_email}")
+                logger.info(f"[BREVO SUCCESS]: Diocesan Assessment email dispatched to {recipient_email}")
                 return True
             else:
-                logger.error(f"Brevo API error ({response.status_code}): {response.text}")
+                logger.error(f"[BREVO API ERROR] ({response.status_code}): {response.text}")
                 return False
 
     except Exception as exc:
-        logger.error(f"Failed to send email via Brevo API: {exc}")
+        logger.error(f"[BREVO DISPATCH FAILED]: Exception sending email to {recipient_email}: {exc}")
         return False
