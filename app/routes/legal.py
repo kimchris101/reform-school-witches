@@ -8,6 +8,55 @@ from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+
+@router.get("/privacy", response_class=HTMLResponse)
+async def render_privacy_policy(request: Request):
+    """Renders Privacy Policy page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/privacy.html",
+        context={
+            "page_title": "Privacy Policy | The Reform School for Witches",
+            "meta_description": "Privacy practices and data usage protocols for The Reform School for Witches."
+        }
+    )
+
+
+@router.get("/terms", response_class=HTMLResponse)
+async def render_terms_of_service(request: Request):
+    """Renders Terms of Service page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/terms.html",
+        context={
+            "page_title": "Terms of Service | The Reform School for Witches",
+            "meta_description": "Terms of service and user agreements for accessing interactive content."
+        }
+    )
+
+
+@router.get("/cookies", response_class=HTMLResponse)
+async def render_cookie_policy(request: Request):
+    """Renders Cookie Policy page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/cookies.html",
+        context={
+            "page_title": "Cookie Policy | The Reform School for Witches",
+            "meta_description": "Information on session tracking and client-side cookie usage."
+        }
+    )
+
+
+@router.get("/contact-modal", response_class=HTMLResponse)
+async def render_contact_modal(request: Request):
+    """Renders the contact form modal overlay."""
+    return templates.TemplateResponse(
+        request=request,
+        name="components/contact_modal.html"
+    )
+
+
 @router.post("/contact-send", response_class=HTMLResponse)
 async def process_contact_form(
     request: Request,
@@ -21,6 +70,7 @@ async def process_contact_form(
     recipient_email = "hello@redcandledigital.io"
 
     if not api_key:
+        print(f"[ CONTACT LOG ] (No API Key Found) From: {name} ({email}) | Subject: {subject}")
         return HTMLResponse(
             content="""
             <div class="bg-black/90 border border-amber-500/60 p-6 rounded text-center space-y-3 font-mono">
@@ -31,7 +81,7 @@ async def process_contact_form(
             """
         )
 
-    # Prepare Brevo API Payload
+    # Prepare Brevo REST API Payload
     payload = {
         "sender": {"name": "RSFW Portal Contact Form", "email": recipient_email},
         "to": [{"email": recipient_email, "name": "RSFW Registrar"}],
