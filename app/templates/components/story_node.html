@@ -46,15 +46,13 @@
         {% endfor %}
     </div>
 
-    <!-- Terminal Interrogation Button -->
+    <!-- Consult Archival Index Button -->
     <div class="border-t border-blood-900/40 pt-4 flex justify-end relative z-10">
         <button hx-get="/interactive/chat-modal/{{ node.speaker|lower|replace(' ', '') }}" 
-                hx-target="#modal-container" 
-                hx-swap="innerHTML"
-                class="font-mono text-xs text-amber-400 hover:text-amber-300 border border-amber-500/40 bg-black/80 hover:bg-amber-500/20 px-3 py-1.5 rounded uppercase tracking-widest transition-colors backdrop-blur-md shadow-md">
-            [ INTERROGATE {{ node.speaker|upper }} VIA TERMINAL ]
+                hx-target="body" 
+                hx-swap="beforeend"
+                class="font-mono text-xs text-amber-400 hover:text-amber-300 border border-amber-500/40 bg-black/80 hover:bg-amber-500/20 px-3 py-1.5 rounded uppercase tracking-widest transition-colors backdrop-blur-md shadow-md flex items-center gap-2">
+            <span>📖</span> [ CONSULT ARCHIVAL INDEX :: {{ node.speaker|upper }} ]
         </button>
     </div>
 </div>
-
-<div id="modal-container"></div>
