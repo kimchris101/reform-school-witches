@@ -228,13 +228,13 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "llama-3.3-70b-versatile",
+                    "model": "openai/gpt-oss-20b",
                     "messages": [
                         {"role": "system", "content": augmented_prompt},
                         {"role": "user", "content": message}
                     ],
                     "temperature": 0.4,
-                    "max_tokens": 250
+                    "max_tokens": 200
                 }
             )
             
