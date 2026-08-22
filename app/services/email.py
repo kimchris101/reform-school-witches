@@ -22,6 +22,7 @@ def send_diocesan_assessment_email(
 ) -> bool:
     """Dispatches a Diocesan Assessment Letter with verification link via Brevo REST API."""
     if not BREVO_API_KEY:
+        print("[BREVO ERROR]: BREVO_API_KEY environment variable is missing or empty. Check your .env file.")
         logger.error("[BREVO ERROR]: BREVO_API_KEY is missing from environment. Skipping email dispatch.")
         return False
 
@@ -42,7 +43,7 @@ def send_diocesan_assessment_email(
     warning = get_val(letter_obj, "warning_notice", "Maintain spiritual vigilance.")
     seal_code = get_val(letter_obj, "diocesan_seal_code", "OLT-ARCHIVE-RESTRICTED")
 
-    # Dynamic Verification CTA Button
+    # Verification CTA Button
     verify_button_html = f"""
     <div style="text-align: center; margin: 28px 0;">
         <a href="{verify_url}" style="background-color: #a30f2e; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 2px; border: 1px solid #dc2626; display: inline-block;">
@@ -202,16 +203,19 @@ def send_diocesan_assessment_email(
     }
 
     try:
-        with httpx.Client(timeout=10.0) as client:
+        with httpx.Client(timeout=12.0) as client:
             response = client.post(BREVO_API_URL, headers=headers, json=payload)
             
             if response.status_code in (200, 201, 202):
+                print(f"[BREVO DISPATCH SUCCESS]: Email delivered to {recipient_email}")
                 logger.info(f"[BREVO SUCCESS]: Diocesan Assessment email dispatched to {recipient_email}")
                 return True
             else:
+                print(f"[BREVO API ERROR] ({response.status_code}): {response.text}")
                 logger.error(f"[BREVO API ERROR] ({response.status_code}): {response.text}")
                 return False
 
     except Exception as exc:
+        print(f"[BREVO DISPATCH FAILED]: Exception: {exc}")
         logger.error(f"[BREVO DISPATCH FAILED]: Exception sending email to {recipient_email}: {exc}")
         return False
