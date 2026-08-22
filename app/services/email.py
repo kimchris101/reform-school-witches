@@ -17,9 +17,10 @@ def send_diocesan_assessment_email(
     recipient_email: str,
     recipient_alias: str,
     archetype_title: str,
-    letter_obj: object
+    letter_obj: object,
+    verify_url: str = ""
 ) -> bool:
-    """Dispatches a Diocesan Assessment Letter via Brevo REST API in background tasks."""
+    """Dispatches a Diocesan Assessment Letter with verification link via Brevo REST API."""
     if not BREVO_API_KEY:
         logger.error("[BREVO ERROR]: BREVO_API_KEY is missing from environment. Skipping email dispatch.")
         return False
@@ -30,20 +31,26 @@ def send_diocesan_assessment_email(
         "content-type": "application/json"
     }
 
-    # Helper function to extract properties from both dicts and Pydantic objects safely
     def get_val(obj, key, default):
         if isinstance(obj, dict):
             return obj.get(key, default)
         return getattr(obj, key, default)
 
-    # Extract fields safely
     classification = get_val(letter_obj, "classification_class", "Academy Initiate")
     patron = get_val(letter_obj, "patron_example", "St. Michael the Archangel")
     summary = get_val(letter_obj, "file_summary", "Record pending classification.")
     warning = get_val(letter_obj, "warning_notice", "Maintain spiritual vigilance.")
     seal_code = get_val(letter_obj, "diocesan_seal_code", "OLT-ARCHIVE-RESTRICTED")
 
-    # Dark Academia Email Template
+    # Dynamic Verification CTA Button
+    verify_button_html = f"""
+    <div style="text-align: center; margin: 28px 0;">
+        <a href="{verify_url}" style="background-color: #a30f2e; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 2px; border: 1px solid #dc2626; display: inline-block;">
+            ✝ VERIFY EMAIL & UNLOCK CLEARANCE
+        </a>
+    </div>
+    """ if verify_url else ""
+
     full_html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -162,6 +169,8 @@ def send_diocesan_assessment_email(
                 <p>{summary}</p>
             </div>
 
+            {verify_button_html}
+
             <div class="warning-box">
                 <div class="warning-header">⚠️ ARCHIVAL DISCIPLINARY NOTICE</div>
                 <div>{warning}</div>
@@ -188,7 +197,7 @@ def send_diocesan_assessment_email(
                 "name": recipient_alias
             }
         ],
-        "subject": f"✝ [Diocesan File] Official Disciplinary Record: Initiate {recipient_alias}",
+        "subject": f"✝ [Diocesan File] Verify Email & Official Disciplinary Record: Initiate {recipient_alias}",
         "htmlContent": full_html_content
     }
 
