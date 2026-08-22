@@ -98,7 +98,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Douay-Rheims Style Gothic Footer with Social, Store & Legal Links -->
+    <!-- Douay-Rheims Style Gothic Footer with Social, Store, Contact & Legal Links -->
     <footer class="border-t border-archive-border bg-archive-card/90 py-8 px-4 font-mono text-xs text-archive-muted space-y-6">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             
@@ -118,9 +118,21 @@
                 <span>ARCHDIOCESE OF NEW ORLEANS — CLASSIFIED PORTAL</span>
             </div>
 
-            <!-- Right: Social & Store Links -->
-            <div class="flex items-center gap-4">
+            <!-- Right: Social, Store & Contact Links -->
+            <div class="flex items-center gap-3">
                 
+                <!-- Contact Mail Button -->
+                <button hx-get="/legal/contact-modal" 
+                        hx-target="body" 
+                        hx-swap="beforeend" 
+                        title="Contact Registrar (hello@redcandledigital.io)"
+                        class="p-2 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-amber-400 hover:border-blood-700 transition-colors flex items-center gap-1.5 font-mono text-[11px] uppercase">
+                    <svg class="w-4 h-4 fill-current text-blood-500" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M1.5 4.5a1.5 1.5 0 0 1 1.5-1.5h18a1.5 1.5 0 0 1 1.5 1.5v15a1.5 1.5 0 0 1-1.5 1.5h-18a1.5 1.5 0 0 1-1.5-1.5v-15zm3 1.5v.75l7.5 5.25 7.5-5.25V6h-15zm15 3.75l-7.5 5.25-7.5-5.25V18h15V9.75z"/>
+                    </svg>
+                    <span class="hidden sm:inline">CONTACT</span>
+                </button>
+
                 <!-- X (Twitter) -->
                 <a href="https://x.com/rsfwseries" 
                    target="_blank" 
