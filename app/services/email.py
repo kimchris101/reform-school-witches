@@ -9,7 +9,7 @@ logger = logging.getLogger("uvicorn.error")
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip().strip('"').strip("'")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "admin@anomik.io").strip()
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "hello@redcandledigital.io").strip()
 SENDER_NAME = os.getenv("SENDER_NAME", "Our Lady of Tears Academy").strip()
 
 
