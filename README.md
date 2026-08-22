@@ -86,4 +86,26 @@ Navigate to [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
 ---
 
+
+
+Phase 2: RSFW Archival Engine & Interactive System
+
+🏰 Catholic Noir World Alignment
+
+* Canon Precision: Cleaned up character profiles to enforce strict role separation—defining Roman as a student initiate/sponsor, Ignatius as a penitent sentry, and Father Manuel as the sole ordained rector.
+* Narrative Accuracy: Resolved role confusion across all story nodes, ensuring backstory details (like New Orleans high-society roots) stay strictly tied to Roman.
+
+📚 Standalone Manuscript Lore Search
+
+* PDF Ingestion: Engine ingests Book I: The Blood Lily Contract, breaking text into searchable chunks with page-level attribution.
+* Multi-Tier Retrieval: Implemented a hybrid lookup that prioritizes curated canonical character cards before searching raw manuscript passages.
+* Offline Efficiency: Decommissioned external LLM dependencies to eliminate API costs, latency, and decommissioned model errors.
+
+🖥️ Interactive Engine & UI Integration
+
+* Archival Modal Overlay: Renamed character interrogation modals to "Consult Archival Index" to match the new lookup functionality.
+* Clean HTMX Rendering: Updated HTMX targets (`/interactive/lore-search`) and templates (`lore_results.html`) for seamless modal updates.
+* Future-Proofing: Built a scalable data pipeline ready to index future book releases (Book II, Book III) and new canon entries seamlessly.
+
+
 © 2026 Red Candle Digital. All Diocesan Records Reserved.
