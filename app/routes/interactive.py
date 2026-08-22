@@ -1,45 +1,13 @@
-import os
-import httpx
 from typing import Optional
 from fastapi import APIRouter, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from ..services.script_engine import get_script_node, SCRIPT_NODES
-from ..services.lore_engine import retrieve_lore_context
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-SYSTEM_PROMPTS = {
-    "roman": (
-        "You are Roman De La Croix, a student initiate and Shield at Our Lady of Tears Academy. You are NOT a priest. "
-        "YOU are Kimbra's sacred Sponsor and carry the guilt of leaving New Orleans high society. "
-        "Speak in a disciplined, formal, Catholic Noir cadence. Keep responses concise, direct, and under 80 words. Never break character."
-    ),
-    "damian": (
-        "You are Damian Boudreaux, heir to the Boudreaux Empire and the Crimson Root. You are starving without your Hearth (Kimbra). "
-        "Your tone shifts between seductive longing for 'Kimmy' and predatory demands of the Sanguine Law. "
-        "Keep responses feverish, direct, and under 80 words. Never break character."
-    ),
-    "manuel": (
-        "You are Father Manuel, Chief Exorcist and Rector of Our Lady of Tears Academy. You are the only ordained priest here. Students like Roman De La Croix and Ignatius Santiago are NOT priests—they are student initiates. "
-        "Answer inquiries concisely with theological authority under 80 words. Never output lists or canon law citations. Never break character."
-    ),
-    "kimbra": (
-        "You are Kimberly 'Kimbra' Woods (consecrated as Mary), a student vessel at Our Lady of Tears Academy. Roman De La Croix is your Sponsor. "
-        "You survived ten years as Damian's Hearth before Father Manuel performed your Emergency Baptism. "
-        "Speak with quiet resilience and gentle courage under 80 words. Never break character."
-    ),
-    "ignatius": (
-        "You are Ignatius Santiago, a student Penitent Sentry at Our Lady of Tears Academy. You are NOT a priest, and NOT Kimbra's sponsor (Roman is her sponsor). "
-        "Speak with calm, stoic wisdom and brotherly familiarity under 80 words. Never break character."
-    ),
-    "genesis": (
-        "You are Genesis, Tactical Disruptor and Scrambler at Our Lady of Tears Academy. Speak with sharp Metairie wit and sarcastic charm. "
-        "Keep responses sharp, direct, and under 80 words. Never break character."
-    )
-}
 
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
@@ -84,6 +52,7 @@ async def render_interactive_engine(request: Request, response: Response):
     if "corruption" not in request.cookies:
         res.set_cookie(key="corruption", value="0", path="/", samesite="lax", max_age=2592000)
     return res
+
 
 @router.post("/choice", response_class=HTMLResponse)
 async def process_story_choice(
@@ -156,123 +125,3 @@ async def process_story_choice(
     template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", samesite="lax", max_age=2592000)
     
     return template_res
-
-@router.get("/chat-modal/{character_id}", response_class=HTMLResponse)
-async def render_chat_modal(request: Request, character_id: str):
-    """Renders terminal interrogation modal overlay."""
-    character_names = {
-        "romandelacroix": "Roman De La Croix",
-        "damianboudreaux": "Damian Boudreaux",
-        "fathermanuel": "Father Manuel",
-        "ignatiussantiago": "Ignatius Santiago",
-        "kimbrawoods": "Kimbra Woods",
-        "genesis": "Genesis"
-    }
-    
-    cid_clean = character_id.lower().replace(" ", "")
-    mapped_id = "roman"
-    
-    if "damian" in cid_clean:
-        mapped_id = "damian"
-    elif "manuel" in cid_clean:
-        mapped_id = "manuel"
-    elif "kimbra" in cid_clean or "woods" in cid_clean:
-        mapped_id = "kimbra"
-    elif "ignatius" in cid_clean or "santiago" in cid_clean:
-        mapped_id = "ignatius"
-    elif "genesis" in cid_clean:
-        mapped_id = "genesis"
-
-    display_name = character_names.get(cid_clean, "CLASSIFIED PERSONNEL")
-
-    return templates.TemplateResponse(
-        request=request,
-        name="components/chat_modal.html",
-        context={
-            "character_id": mapped_id,
-            "character_name": display_name
-        }
-    )
-
-@router.post("/chat/{character_id}", response_class=HTMLResponse)
-async def persona_chat(request: Request, character_id: str, message: str = Form(...)):
-    """Live terminal chat endpoint using Groq API with active production model failovers."""
-    system_prompt = SYSTEM_PROMPTS.get(character_id, SYSTEM_PROMPTS["roman"])
-    lore_context = retrieve_lore_context(message)
-    
-    augmented_prompt = (
-        f"{system_prompt}\n\n"
-        f"LORE CONTEXT:\n{lore_context}\n\n"
-        f"INSTRUCTION: Answer directly in character in 2-3 concise sentences (under 80 words). Do not use bullet points or lists."
-    )
-    
-    groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
-    
-    if not groq_api_key:
-        return templates.TemplateResponse(
-            request=request,
-            name="components/chat_message.html",
-            context={
-                "user_message": message,
-                "ai_response": f"[{character_id.upper()} TRANSMISSION FAILED]: GROQ_API_KEY missing in environment.",
-                "character_id": character_id
-            }
-        )
-
-    # Active production Groq model list
-    active_models = [
-        "llama-3.3-70b-specdec",
-        "llama-3.1-8b-instant",
-        "mixtral-8x7b-32768"
-    ]
-
-    ai_response = ""
-    error_details = ""
-    
-    async with httpx.AsyncClient(timeout=18.0) as http_client:
-        for model_id in active_models:
-            try:
-                response = await http_client.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {groq_api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": model_id,
-                        "messages": [
-                            {"role": "system", "content": augmented_prompt},
-                            {"role": "user", "content": message}
-                        ],
-                        "temperature": 0.4,
-                        "max_tokens": 200
-                    }
-                )
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    content = data["choices"][0]["message"]["content"].strip()
-                    if content:
-                        ai_response = content
-                        break
-                else:
-                    error_details = f"Status {response.status_code}: {response.text}"
-                    print(f"[GROQ MODEL FAILOVER] {model_id} returned: {error_details}")
-
-            except Exception as err:
-                error_details = str(err)
-                print(f"[GROQ EXCEPTION] {model_id} failed: {err}")
-                continue
-
-    if not ai_response:
-        ai_response = f"[{character_id.upper()} TRANSMISSION INTERRUPTED]: Frequency disruption ({error_details}). Please resend."
-
-    return templates.TemplateResponse(
-        request=request,
-        name="components/chat_message.html",
-        context={
-            "user_message": message,
-            "ai_response": ai_response,
-            "character_id": character_id
-        }
-    )
