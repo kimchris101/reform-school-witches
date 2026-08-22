@@ -9,6 +9,31 @@ from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+
+@router.get("/privacy", response_class=HTMLResponse)
+async def render_privacy_policy(request: Request):
+    return templates.TemplateResponse(request=request, name="pages/privacy.html")
+
+
+@router.get("/terms", response_class=HTMLResponse)
+async def render_terms_of_service(request: Request):
+    return templates.TemplateResponse(request=request, name="pages/terms.html")
+
+
+@router.get("/cookies", response_class=HTMLResponse)
+async def render_cookie_policy(request: Request):
+    return templates.TemplateResponse(request=request, name="pages/cookies.html")
+
+
+@router.get("/contact-modal", response_class=HTMLResponse)
+async def render_contact_modal(request: Request):
+    """Renders the contact form modal overlay."""
+    return templates.TemplateResponse(
+        request=request,
+        name="components/contact_modal.html"
+    )
+
+
 @router.post("/contact-send", response_class=HTMLResponse)
 async def process_contact_form(
     request: Request,
@@ -17,7 +42,7 @@ async def process_contact_form(
     subject: str = Form(...),
     message: str = Form(...)
 ):
-    """Dispatches contact form submission via Brevo SMTP to bypass REST API IP whitelisting."""
+    """Dispatches contact form submission via Brevo SMTP to hello@redcandledigital.io."""
     smtp_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = "hello@redcandledigital.io"
 
@@ -26,14 +51,13 @@ async def process_contact_form(
             content="""
             <div class="bg-black/90 border border-amber-500/60 p-6 rounded text-center space-y-3 font-mono">
                 <span class="text-amber-400 font-bold">[ LOCAL DEV MODE ]</span>
-                <p class="text-xs text-parchment-200">Set <code class="text-blood-400">BREVO_API_KEY</code> in .env to enable live delivery.</p>
+                <p class="text-xs text-parchment-200">Set BREVO_API_KEY in .env to enable live delivery.</p>
                 <button onclick="document.getElementById('modal-container').remove()" class="bg-blood-900 text-parchment-100 text-xs px-4 py-2 uppercase font-bold">DISMISS</button>
             </div>
             """
         )
 
     try:
-        # Create Email Envelope
         msg = MIMEMultipart("alternative")
         msg["Subject"] = f"[RSFW PORTAL INQUIRY] {subject}"
         msg["From"] = f"RSFW Portal Contact Form <{sender_email}>"
@@ -51,10 +75,8 @@ async def process_contact_form(
         """
         msg.attach(MIMEText(html_body, "html"))
 
-        # Connect to Brevo SMTP Server (Port 587)
         with smtplib.SMTP("smtp-relay.brevo.com", 587) as server:
             server.starttls()
-            # Login using your Brevo SMTP login email and API Key
             server.login(sender_email, smtp_key)
             server.sendmail(sender_email, [sender_email], msg.as_string())
 
@@ -76,7 +98,7 @@ async def process_contact_form(
             content="""
             <div class="bg-black/90 border border-blood-700 p-6 rounded text-center space-y-3 font-mono">
                 <span class="text-blood-500 font-bold">[ TRANSMISSION ERROR ]</span>
-                <p class="text-xs text-parchment-200">Unable to route message via Brevo. Please write directly to <span class="text-blood-400">hello@redcandledigital.io</span>.</p>
+                <p class="text-xs text-parchment-200">Unable to route message. Please write directly to <span class="text-blood-400">hello@redcandledigital.io</span>.</p>
                 <button onclick="document.getElementById('modal-container').remove()" class="bg-blood-900 text-parchment-100 text-xs px-4 py-2 uppercase font-bold">DISMISS</button>
             </div>
             """
