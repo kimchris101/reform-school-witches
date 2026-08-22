@@ -128,6 +128,36 @@ async def process_story_choice(
     return template_res
 
 
+@router.get("/chat-modal/{character_id}", response_class=HTMLResponse)
+async def render_chat_modal(request: Request, character_id: str):
+    """Renders terminal interrogation modal overlay for manuscript searches."""
+    character_names = {
+        "romandelacroix": "Roman De La Croix",
+        "roman": "Roman De La Croix",
+        "damianboudreaux": "Damian Boudreaux",
+        "damian": "Damian Boudreaux",
+        "fathermanuel": "Father Manuel",
+        "manuel": "Father Manuel",
+        "ignatiussantiago": "Ignatius Santiago",
+        "ignatius": "Ignatius Santiago",
+        "kimbrawoods": "Kimbra Woods",
+        "kimbra": "Kimbra Woods",
+        "genesis": "Genesis"
+    }
+    
+    cid_clean = character_id.lower().replace(" ", "")
+    display_name = character_names.get(cid_clean, "ARCHIVAL TERMINAL")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="components/chat_modal.html",
+        context={
+            "character_id": cid_clean,
+            "character_name": display_name
+        }
+    )
+
+
 @router.post("/lore-search", response_class=HTMLResponse)
 async def manuscript_lore_query(request: Request, query: str = Form(...)):
     """Scans Book I manuscript PDF locally and returns verbatim excerpts."""
