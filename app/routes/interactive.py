@@ -204,10 +204,13 @@ async def persona_chat(request: Request, character_id: str, message: str = Form(
     
     augmented_system_prompt = (
         f"{system_prompt}\n\n"
-        f"CANONICAL MANUSCRIPT REPOSITORY LORE:\n"
+        f"CANONICAL LORE CONTEXT:\n"
         f"{lore_context}\n\n"
-        f"INSTRUCTION: Answer the query accurately using the provided manuscript lore while maintaining your persona. Always finish your thoughts in complete sentences."
+        f"INSTRUCTION: Answer the inquiry directly in complete sentences using the canonical lore provided. "
+        f"Never say 'the excerpt provided does not mention'. Answer naturally in character as an inhabitant of Our Lady of Tears Academy."
     )
+    
+    # ... rest of persona_chat execution logic remains unchanged ...
     
     groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
     
