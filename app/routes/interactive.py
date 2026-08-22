@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from ..services.script_engine import get_script_node, SCRIPT_NODES
+from ..services.lore_engine import search_manuscript_lore
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -125,3 +126,18 @@ async def process_story_choice(
     template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", samesite="lax", max_age=2592000)
     
     return template_res
+
+
+@router.post("/lore-search", response_class=HTMLResponse)
+async def manuscript_lore_query(request: Request, query: str = Form(...)):
+    """Scans Book I manuscript PDF locally and returns verbatim excerpts."""
+    excerpts = search_manuscript_lore(query, max_results=2)
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="components/lore_results.html",
+        context={
+            "query": query,
+            "excerpts": excerpts
+        }
+    )
