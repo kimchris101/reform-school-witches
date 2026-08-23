@@ -95,7 +95,7 @@ INSERT INTO public.character_dossiers (
     'The Blessed Virgin Mary', 
     'Consecrated Light & Unbroken Vessels', 
     'Consecrated Vessel / Exception', 
-    'Sold to the Crimson Root as child due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she has been gifted a raw holy illumination, serving as the flame around which the Academy''s perimeter walls are sustained.', 
+    'Sold to the Crimson Root as a child due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she has been gifted a raw holy illumination, serving as the flame around which the Academy''s perimeter walls are sustained.', 
     ARRAY['They tried to turn my heart into a battery. They forgot that Light consumes the wires.', 'My interior doors remain locked.'], 
     '/static/media/dossiers/kimbra.jpg', 
     FALSE
