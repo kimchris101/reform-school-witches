@@ -82,7 +82,7 @@ INSERT INTO public.character_dossiers (
     'The Co-Link Conduit', 
     'St. Michael the Archangel', 
     'Symphonic Resonance & Sacramental Steel', 
-    'High Rite Specialist / Perimeter Marshal', 
+    'High Rite Shield / Perimeter Marshal', 
     'Forged in the crucible of the New Orleans Diocesan Tribunal, Roman acts as the primary anchor for High Rite exorcisms. His soul operates as a high-capacity conduit, capable of interlocking spiritual frequencies with a partner to form an unbreakable barrier against demonic broadcast signals.', 
     ARRAY['Two heartbeats, one circuit. The dark cannot break what is held in common.', 'Keep your feet in the salt and your eyes on the altar.'], 
     '/static/media/dossiers/roman.jpg', 
@@ -95,7 +95,7 @@ INSERT INTO public.character_dossiers (
     'The Blessed Virgin Mary', 
     'Consecrated Light & Unbroken Vessels', 
     'Consecrated Vessel / Exception', 
-    'Targeted from birth by the Sanguine Coven due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she now channels raw holy illumination, serving as the flame around which the Academy''s perimeter walls are built.', 
+    'Sold to the Crimson Root as child due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she has been gifted a raw holy illumination, serving as the flame around which the Academy''s perimeter walls are sustained.', 
     ARRAY['They tried to turn my heart into a battery. They forgot that Light consumes the wires.', 'My interior doors remain locked.'], 
     '/static/media/dossiers/kimbra.jpg', 
     FALSE
@@ -107,7 +107,7 @@ INSERT INTO public.character_dossiers (
     'St. Cecilia', 
     'Acoustic Dissonance & Signal Interruption', 
     'Tactical Disruptor / Free Conduits', 
-    'A prodigal daughter of the Catholic Church, dabbled in the occult and was left screaming in a mental health facility, the rector, Father Manuel and his team exorcised the demon afflicting her and she chose to enter the Academy for reform. As a fractured frequency she learned to scramble the enemy''s signal.', 
+    'A prodigal daughter of the Catholic Church, dabbled in the occult and was left screaming in a mental health facility. The Rector, Father Manuel and his team exorcised the demon afflicting her and she chose to enter the Academy for reform. As a fractured frequency she learned to scramble the enemy''s signal.', 
     ARRAY['If they cannot lock onto your frequency, they cannot harvest your marrow.', 'Noise is just a prayer that has not found its cadence yet.'], 
     '/static/media/dossiers/genesis.jpg', 
     FALSE

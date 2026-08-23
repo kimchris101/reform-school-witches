@@ -17,7 +17,7 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
         alias="The Co-Link Conduit",
         patron_saint="St. Michael the Archangel",
         sacramental_affinity="Symphonic Resonance & Sacramental Steel",
-        classification_class="High Rite Specialist / Perimeter Marshal",
+        classification_class="High Rite Shield / Perimeter Marshal",
         biography="Forged in the crucible of the New Orleans Diocesan Tribunal, Roman acts as the primary anchor for High Rite exorcisms. His soul operates as a high-capacity conduit, capable of interlocking spiritual frequencies with a partner to form an unbreakable barrier against demonic broadcast signals.",
         key_quotes=[
             "Two heartbeats, one circuit. The dark cannot break what is held in common.",
@@ -34,7 +34,7 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
         patron_saint="Our Lady of Tears",
         sacramental_affinity="Consecrated Light & Unbroken Vessels",
         classification_class="Consecrated Vessel / Exception",
-        biography="Targeted from birth by the Sanguine Coven due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she now channels raw holy illumination, serving as the flame around which the Academy's perimeter walls are built.",
+        biography="Sold to the Crimson Root as child due to her uncorrupted spiritual purity, Kimbra was intended to serve as a power source for an ancestral blood debt. Sealed by the Sacrament at Our Lady of Tears Academy, she has been gifted a raw holy illumination, serving as the flame around which the Academy's perimeter walls are sustained.",
         key_quotes=[
             "They tried to turn my heart into a battery. They forgot that Light consumes the wires.",
             "My interior doors remain locked."
@@ -50,7 +50,7 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
         patron_saint="St. Cecilia",
         sacramental_affinity="Acoustic Dissonance & Signal Interruption",
         classification_class="Tactical Disruptor / Free Conduits",
-        biography="A prodigal daughter of the Catholic Church, dabbled in the occult and was left screaming in a mental health facility, the rector, Father Manuel and his team exorcised the demon afflicting her and she chose to enter the Academy for reform. A fractured frequency she learned to scramble the enemy's signal.",
+        biography="A prodigal daughter of the Catholic Church, dabbled in the occult and was left screaming in a mental health facility. The Rector, Father Manuel and his team exorcised the demon afflicting her and she chose to enter the Academy for reform. As a fractured frequency she learned to scramble the enemy's signal.",
         key_quotes=[
             "If they can't lock onto your frequency, they can't harvest your marrow.",
             "Noise is just a prayer that hasn't found its cadence yet."
@@ -62,7 +62,7 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
         id=uuid4(),
         slug="ignatius-santiago",
         full_name="Ignatius Santiago",
-        alias="The Sentinel Shield",
+        alias="The Sentinel",
         patron_saint="St. James the Greater",
         sacramental_affinity="Granite Density & Sacramental Fortification",
         classification_class="Perimeter Guard / Penitent Sentry",
