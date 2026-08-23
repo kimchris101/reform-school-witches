@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def set_game_cookie(response: Response, key: str, value: str, max_age: int = 2592000):
-    """Utility helper to set cookies with centralized security configurations from app/core/config.py."""
+    """Utility helper to set cookies with centralized security configurations from app/config.py."""
     response.set_cookie(
         key=key,
         value=str(value),
@@ -24,6 +24,7 @@ def set_game_cookie(response: Response, key: str, value: str, max_age: int = 259
     )
 
 
+@router.get("", response_class=HTMLResponse)
 @router.get("/", response_class=HTMLResponse)
 async def render_interactive_engine(request: Request, response: Response):
     """Renders engine if authenticated via Intake Exam; otherwise displays clearance restriction screen."""
@@ -179,13 +180,13 @@ async def process_lore_search(
     query: str = Form(...)
 ):
     """Searches the offline manuscript PDF/curated fallback and renders excerpt cards via HTMX."""
-    results = search_manuscript_lore(query)
+    excerpts = search_manuscript_lore(query)
     
     return templates.TemplateResponse(
         request=request,
         name="components/lore_results.html",
         context={
             "query": query,
-            "results": results
+            "excerpts": excerpts
         }
     )
