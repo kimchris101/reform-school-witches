@@ -1,28 +1,36 @@
-import os
-from dotenv import load_dotenv
-
-# MUST be executed before importing app.routes modules
-load_dotenv()
-
-from fastapi import FastAPI, Request, Response
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.routes import intake, dossier, media, interactive, vault, industry
-from app.routes import legal  # Import legal routes
+from app.config import settings
+from app.services.lore_engine import initialize_pdf_lore_index
+from app.routes import intake, dossier, media, interactive, vault, industry, legal
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Pre-index the manuscript PDF into memory
+    initialize_pdf_lore_index()
+    yield
+    # Shutdown logic (if required in future)
+
 
 app = FastAPI(
-    title="The Reform School for Witches Series - Reader Portal API",
+    title=settings.PROJECT_NAME,
     description="Backend engine for interactive visual novel choices, archetype intake diagnostics, cinematic unlocks, classified book vault, and industry pitch portal.",
-    version="1.0.0"
+    version="1.0.0",
+    debug=settings.DEBUG,
+    lifespan=lifespan
 )
 
 # CORS Configuration
 origins = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://*.onrender.com"
+    "https://*.onrender.com",
+    settings.SITE_URL
 ]
 
 app.add_middleware(
@@ -47,6 +55,34 @@ app.include_router(industry.router, prefix="/industry", tags=["Industry Pitch"])
 app.include_router(legal.router, prefix="/legal", tags=["Legal"])
 
 
+# Custom 404 Exception Handler
+@app.exception_handler(404)
+async def custom_404_handler(request: Request, exc):
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/index.html",
+        context={
+            "page_title": "Archival Record Not Found | RSFW",
+            "meta_description": "The requested diocesan record does not exist or has been restricted."
+        },
+        status_code=status.HTTP_404_NOT_FOUND
+    )
+
+
+# Custom 500 Exception Handler
+@app.exception_handler(500)
+async def custom_500_handler(request: Request, exc):
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/index.html",
+        context={
+            "page_title": "Tribunal Signal Anomaly | RSFW",
+            "meta_description": "An internal system anomaly was encountered during archival retrieval."
+        },
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+
+
 @app.get("/", include_in_schema=False)
 async def read_root(request: Request):
     return templates.TemplateResponse(
@@ -62,7 +98,7 @@ async def read_root(request: Request):
 @app.get("/sitemap.xml", include_in_schema=False)
 async def get_sitemap():
     """Dynamically generates an XML sitemap for search engines."""
-    domain = "https://rsfwseries.com"
+    domain = settings.SITE_URL.rstrip('/')
     
     pages = [
         {"loc": "/", "changefreq": "weekly", "priority": "1.0"},
@@ -102,7 +138,7 @@ async def get_robots():
         "Allow: /industry\n"
         "Disallow: /dossiers/easter-egg/\n"
         "Disallow: /vault/download/\n\n"
-        "Sitemap: https://rsfwseries.com/sitemap.xml\n"
+        f"Sitemap: {settings.SITE_URL.rstrip('/')}/sitemap.xml\n"
     )
     return Response(content=content, media_type="text/plain")
 
@@ -112,5 +148,5 @@ async def health_check():
     return {
         "status": "ok",
         "academy": "Our Lady of Tears",
-        "environment": os.getenv("ENVIRONMENT", "development")
+        "environment": settings.APP_ENV
     }
