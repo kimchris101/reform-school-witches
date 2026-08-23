@@ -31,6 +31,7 @@ class CharacterDossier(BaseModel):
     patron_saint: str
     sacramental_affinity: str
     classification_class: str
+    current_location: Optional[str] = "Our Lady of Tears Grounds"
     biography: str
     key_quotes: List[str]
     portrait_url: str

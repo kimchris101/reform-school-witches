@@ -24,10 +24,10 @@
 
         <div class="space-y-6 text-sm md:text-base leading-relaxed text-archive-bg">
             
-            <!-- Metadata Table -->
+            <!-- Metadata Table (Dynamic Location Binding) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs bg-blood-900/10 p-4 border border-blood-900/30">
                 <div><span class="text-archive-bg/70 block">CLASSIFICATION:</span> <strong>{{ character.classification_class }}</strong></div>
-                <div><span class="text-archive-bg/70 block">LOCATION:</span> <strong>North Wing Infirmary (Vault 4)</strong></div>
+                <div><span class="text-archive-bg/70 block">LOCATION:</span> <strong>{{ character.current_location or character.location or "Our Lady of Tears Grounds" }}</strong></div>
             </div>
 
             <!-- Clinical Comatose Monitor (Only Active Report for Damian) -->
@@ -94,6 +94,7 @@
         </div>
     </div>
 </div>
+
 <!-- Listener for St. Cyprian Lore Decryption Cutscene -->
 <script>
   document.body.addEventListener("launchCyprianCutscene", function() {
