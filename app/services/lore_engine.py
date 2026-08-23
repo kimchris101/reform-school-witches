@@ -40,6 +40,7 @@ CURATED_LORE_DATABASE = [
     },
     {
         "keywords": ["kimbra", "kimbra woods", "mary", "vessel"],
+        "title": "KIMBRA WOODS :: STUDENT VESSEL",
         "content": (
             "Kimberly 'Kimbra' Woods (consecrated as Mary) is a student vessel at Our Lady of Tears Academy. "
             "After surviving ten years tied to Damian Boudreaux, she escaped to the sanctuary where her emergency baptism severed her tether."
@@ -48,6 +49,7 @@ CURATED_LORE_DATABASE = [
     },
     {
         "keywords": ["ignatius", "ignatius santiago", "sentry"],
+        "title": "IGNATIUS SANTIAGO :: PENITENT SENTRY",
         "content": (
             "Ignatius Santiago is a student initiate and Penitent Sentry at Our Lady of Tears Academy. "
             "He stands watch over the perimeter salt lines and brine moat with calm, stoic vigilance."
@@ -69,7 +71,9 @@ def initialize_pdf_lore_index():
     """Ingests the manuscript PDF from settings.MANUSCRIPT_PATH and indexes clean page contents into searchable chunks."""
     global PDF_TEXT_CHUNKS
     
-    pdf_path = Path(settings.MANUSCRIPT_PATH)
+    # Resolve absolute path relative to project root (up 3 levels from app/services/lore_engine.py)
+    project_root = Path(__file__).resolve().parent.parent.parent
+    pdf_path = project_root / settings.MANUSCRIPT_PATH
     
     if not pdf_path.exists():
         print(f"[ LORE ENGINE ] PDF not found at '{pdf_path}'. Utilizing primary curated database only.")
