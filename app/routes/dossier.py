@@ -21,7 +21,7 @@ CHARACTER_DB: dict[str, CharacterDossier] = {
         current_location="Rector's Office",
         biography="Forged in the crucible of the New Orleans Diocesan Tribunal, Roman acts as the primary anchor for High Rite exorcisms. His soul operates as a high-capacity conduit, capable of interlocking spiritual frequencies with a partner to form an unbreakable barrier against demonic broadcast signals.",
         key_quotes=[
-            "Two heartbeats, one circuit. The dark cannot break what is held in common.",
+            "Two heartbeats, one circuit. The dark cannot break what is bound by the Almighty.",
             "Keep your feet in the salt and your eyes on the altar."
         ],
         portrait_url="/static/media/dossiers/roman.jpg",
