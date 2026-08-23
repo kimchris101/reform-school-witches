@@ -17,7 +17,7 @@ CURATED_LORE_DATABASE = [
             "Having renounced his high-society New Orleans origins for a uniform of salt and stone, "
             "Roman serves as Kimbra Woods' sacred Sponsor, bound by oath to protect her from the Crimson Root."
         ),
-        "page": "Book I: Official Character Record"
+        "page": "Official Character Record"
     },
     {
         "keywords": ["father manuel", "manuel", "rector", "exorcist"],
@@ -27,7 +27,7 @@ CURATED_LORE_DATABASE = [
             "As the primary ordained authority at the academy, he oversees canonical records, "
             "sacramental barriers, and performed Kimbra's Emergency Baptism in the White Room."
         ),
-        "page": "Book I: Official Character Record"
+        "page": "Official Character Record"
     },
     {
         "keywords": ["damian", "damian boudreaux", "root", "crimson heir"],
@@ -36,7 +36,7 @@ CURATED_LORE_DATABASE = [
             "Damian Boudreaux is the heir to the Boudreaux Empire and leader of the parasitic Crimson Root network. "
             "He views Kimbra as his 'Hearth' and seeks to enforce ancestral graft tethers under the Sanguine Law."
         ),
-        "page": "Book I: Official Character Record"
+        "page": "Official Character Record"
     },
     {
         "keywords": ["kimbra", "kimbra woods", "mary", "vessel"],
@@ -45,7 +45,7 @@ CURATED_LORE_DATABASE = [
             "Kimberly 'Kimbra' Woods (consecrated as Mary) is a student vessel at Our Lady of Tears Academy. "
             "After surviving ten years tied to Damian Boudreaux, she escaped to the sanctuary where her emergency baptism severed her tether."
         ),
-        "page": "Book I: Official Character Record"
+        "page": "Official Character Record"
     },
     {
         "keywords": ["ignatius", "ignatius santiago", "sentry"],
@@ -54,7 +54,7 @@ CURATED_LORE_DATABASE = [
             "Ignatius Santiago is a student initiate and Penitent Sentry at Our Lady of Tears Academy. "
             "He stands watch over the perimeter salt lines and brine moat with calm, stoic vigilance."
         ),
-        "page": "Book I: Official Character Record"
+        "page": "Official Character Record"
     }
 ]
 
@@ -102,14 +102,16 @@ def initialize_pdf_lore_index():
                     if len(current_chunk.strip()) > 60:
                         chunks.append({
                             "page": f"Page {page_num}",
-                            "text": current_chunk.strip()
+                            "text": current_chunk.strip(),
+                            "content": current_chunk.strip()
                         })
                     current_chunk = sentence
 
             if len(current_chunk.strip()) > 60:
                 chunks.append({
                     "page": f"Page {page_num}",
-                    "text": current_chunk.strip()
+                    "text": current_chunk.strip(),
+                    "content": current_chunk.strip()
                 })
 
         PDF_TEXT_CHUNKS = chunks
@@ -132,7 +134,8 @@ def search_manuscript_lore(query: str, max_results: int = 2) -> List[Dict[str, A
         if any(keyword in query_clean for keyword in entry["keywords"]):
             curated_matches.append({
                 "page": entry["page"],
-                "text": entry["content"]
+                "text": entry["content"],
+                "content": entry["content"]
             })
 
     if curated_matches:
@@ -154,6 +157,7 @@ def search_manuscript_lore(query: str, max_results: int = 2) -> List[Dict[str, A
                 pdf_results.append({
                     "page": chunk["page"],
                     "text": chunk["text"],
+                    "content": chunk["text"],
                     "score": matches
                 })
 

@@ -18,9 +18,9 @@
         {% if excerpts %}
             {% for excerpt in excerpts %}
             <div class="bg-blood-950/40 border border-blood-900/80 text-parchment-100 p-4 rounded-sm max-w-2xl font-serif italic leading-relaxed shadow-lg space-y-2">
-                <p>"{{ excerpt.text }}"</p>
+                <p>"{{ excerpt.text or excerpt.content }}"</p>
                 <div class="font-mono text-[10px] text-blood-400 uppercase tracking-wider text-right border-t border-blood-900/40 pt-1">
-                    Book I: The Blood Lily Contract • Page {{ excerpt.page }}
+                    Book I: The Blood Lily Contract • {{ excerpt.page }}
                 </div>
             </div>
             {% endfor %}
