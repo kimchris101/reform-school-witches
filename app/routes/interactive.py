@@ -3,11 +3,25 @@ from fastapi import APIRouter, Request, Form, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from app.core.config import settings
 from ..services.script_engine import get_script_node, SCRIPT_NODES
 from ..services.lore_engine import search_manuscript_lore
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+
+def set_game_cookie(response: Response, key: str, value: str, max_age: int = 2592000):
+    """Utility helper to set cookies with centralized security configurations from app/core/config.py."""
+    response.set_cookie(
+        key=key,
+        value=str(value),
+        max_age=max_age,
+        path="/",
+        httponly=settings.COOKIE_HTTPONLY,
+        secure=settings.COOKIE_SECURE,
+        samesite=settings.COOKIE_SAMESITE,
+    )
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -48,10 +62,12 @@ async def render_interactive_engine(request: Request, response: Response):
             "corruption": corruption
         }
     )
+    
     if "sanctity" not in request.cookies:
-        res.set_cookie(key="sanctity", value="0", path="/", samesite="lax", max_age=2592000)
+        set_game_cookie(res, "sanctity", str(sanctity))
     if "corruption" not in request.cookies:
-        res.set_cookie(key="corruption", value="0", path="/", samesite="lax", max_age=2592000)
+        set_game_cookie(res, "corruption", str(corruption))
+        
     return res
 
 
@@ -122,8 +138,8 @@ async def process_story_choice(
         }
     )
     
-    template_res.set_cookie(key="sanctity", value=str(new_sanctity), path="/", samesite="lax", max_age=2592000)
-    template_res.set_cookie(key="corruption", value=str(new_corruption), path="/", samesite="lax", max_age=2592000)
+    set_game_cookie(template_res, "sanctity", str(new_sanctity))
+    set_game_cookie(template_res, "corruption", str(new_corruption))
     
     return template_res
 
@@ -144,30 +160,32 @@ async def render_chat_modal(request: Request, character_id: str):
         "kimbra": "Kimbra Woods",
         "genesis": "Genesis"
     }
-    
-    cid_clean = character_id.lower().replace(" ", "")
-    display_name = character_names.get(cid_clean, "ARCHIVAL TERMINAL")
+
+    display_name = character_names.get(character_id.lower(), character_id.replace("-", " ").title())
 
     return templates.TemplateResponse(
         request=request,
         name="components/chat_modal.html",
         context={
-            "character_id": cid_clean,
+            "character_id": character_id,
             "character_name": display_name
         }
     )
 
 
 @router.post("/lore-search", response_class=HTMLResponse)
-async def manuscript_lore_query(request: Request, query: str = Form(...)):
-    """Scans Book I manuscript PDF locally and returns verbatim excerpts."""
-    excerpts = search_manuscript_lore(query, max_results=2)
+async def process_lore_search(
+    request: Request,
+    query: str = Form(...)
+):
+    """Searches the offline manuscript PDF/curated fallback and renders excerpt cards via HTMX."""
+    results = search_manuscript_lore(query)
     
     return templates.TemplateResponse(
         request=request,
         name="components/lore_results.html",
         context={
             "query": query,
-            "excerpts": excerpts
+            "results": results
         }
     )

@@ -1,24 +1,24 @@
-from typing import Optional
+from typing import Optional, Literal
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Application Config
     PROJECT_NAME: str = "The Reform School for Witches - Reader Portal"
-    APP_ENV: str = "development"  # development, staging, production
+    APP_ENV: str = "development"
     DEBUG: bool = True
     PORT: int = 8000
     SECRET_KEY: str = "dev_secret_key_change_in_production"
     SITE_URL: str = "http://localhost:8000"
 
     # Cookie Security Settings
-    COOKIE_SECURE: bool = False     # False for http://localhost, True for staging HTTPS
-    COOKIE_HTTPONLY: bool = True    # XSS Protection
-    COOKIE_SAMESITE: str = "lax"    # CSRF Protection
+    COOKIE_SECURE: bool = False
+    COOKIE_HTTPONLY: bool = True
+    COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
 
     # Manuscript Path
     MANUSCRIPT_PATH: str = "app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf"
 
-    # Supabase Credentials (Optional if relying solely on zero-db cookie session tracking)
+    # Supabase Credentials
     SUPABASE_URL: Optional[str] = None
     SUPABASE_ANON_KEY: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
