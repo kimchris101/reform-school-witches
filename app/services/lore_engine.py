@@ -3,8 +3,9 @@ from pathlib import Path
 from typing import List, Dict, Any
 from pypdf import PdfReader
 
+from ..config import settings
+
 PDF_TEXT_CHUNKS: List[Dict[str, Any]] = []
-PDF_PATH = Path("app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf")
 
 # Primary Curated Lore Records (Guarantees 100% accuracy for key character queries)
 CURATED_LORE_DATABASE = [
@@ -65,15 +66,17 @@ def clean_manuscript_text(text: str) -> str:
 
 
 def initialize_pdf_lore_index():
-    """Ingests the manuscript PDF and indexes clean page contents into searchable chunks."""
+    """Ingests the manuscript PDF from settings.MANUSCRIPT_PATH and indexes clean page contents into searchable chunks."""
     global PDF_TEXT_CHUNKS
     
-    if not PDF_PATH.exists():
-        print(f"[ LORE ENGINE ] PDF not found at {PDF_PATH}. Utilizing primary registry.")
+    pdf_path = Path(settings.MANUSCRIPT_PATH)
+    
+    if not pdf_path.exists():
+        print(f"[ LORE ENGINE ] PDF not found at '{pdf_path}'. Utilizing primary curated database only.")
         return
 
     try:
-        reader = PdfReader(str(PDF_PATH))
+        reader = PdfReader(str(pdf_path))
         chunks = []
 
         for page_num, page in enumerate(reader.pages, start=1):
@@ -110,9 +113,6 @@ def initialize_pdf_lore_index():
 
     except Exception as e:
         print(f"[ LORE ENGINE ERROR ] PDF Ingestion failed: {e}")
-
-
-initialize_pdf_lore_index()
 
 
 def search_manuscript_lore(query: str, max_results: int = 2) -> List[Dict[str, Any]]:
