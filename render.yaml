@@ -18,8 +18,8 @@ services:
       - key: BREVO_API_KEY
         sync: false
       - key: BREVO_SENDER_EMAIL
-        value: diocesan-registry@reformschoolforwitches.com
+        value: hello@redcandledigital.io
       - key: BREVO_SENDER_NAME
-        value: "Diocesan Tribunal Authority"
+        value: "Our Lady of Tears Academy"
       - key: SECRET_KEY
         generateValue: true
