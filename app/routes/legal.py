@@ -49,14 +49,6 @@ async def render_cookie_policy(request: Request):
     )
 
 
-@router.get("/contact-modal", response_class=HTMLResponse)
-async def render_contact_modal(request: Request):
-    """Renders the contact form modal overlay."""
-    return templates.TemplateResponse(
-        request=request,
-        name="components/contact_modal.html"
-    )
-
 @router.get("/inspiration", response_class=HTMLResponse)
 async def render_inspiration_page(request: Request):
     """Renders the Spiritual Inspiration tribute page."""
@@ -68,6 +60,25 @@ async def render_inspiration_page(request: Request):
             "meta_description": "A tribute to Blessed Sister Maria Laura Mainetti and Sister Amalia—the true spiritual inspirations behind the world of RSFW."
         }
     )
+
+
+@router.get("/contact-modal", response_class=HTMLResponse)
+async def render_contact_modal(request: Request):
+    """Renders the contact form modal overlay."""
+    return templates.TemplateResponse(
+        request=request,
+        name="components/contact_modal.html"
+    )
+
+
+@router.get("/mobile-nav", response_class=HTMLResponse)
+async def render_mobile_nav(request: Request):
+    """Renders the mobile navigation drawer overlay."""
+    return templates.TemplateResponse(
+        request=request,
+        name="components/mobile_nav.html"
+    )
+
 
 def send_brevo_payload(payload: dict, api_key: str, ssl_context: ssl.SSLContext) -> bool:
     """Helper function to execute HTTPS POST requests to Brevo API."""

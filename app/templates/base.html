@@ -69,12 +69,22 @@
                 <span class="inline-block w-2.5 h-2.5 rounded-full bg-blood-600 group-hover:bg-blood-500 transition-colors shadow-[0_0_8px_#a30f2e]"></span>
                 <span class="font-bold text-parchment-100 tracking-wider uppercase group-hover:text-blood-500 transition-colors font-gothic">RSFW Series</span>
             </a>
-            <span class="text-archive-muted">/</span>
+            <span class="text-archive-muted hidden sm:inline">/</span>
             <span class="text-archive-muted hidden sm:inline uppercase tracking-widest text-[10px]">Classification: Sacramental Realism</span>
         </div>
 
-        <!-- Registry Navigation -->
-        <div class="flex items-center space-x-3 md:space-x-5">
+        <!-- Mobile Navigation Toggle Button -->
+        <button hx-get="/legal/mobile-nav" 
+                hx-target="body" 
+                hx-swap="beforeend"
+                class="md:hidden p-2 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-blood-500 transition-colors flex items-center gap-1">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+        </button>
+
+        <!-- Desktop Navigation Bar -->
+        <div class="hidden md:flex items-center space-x-3 md:space-x-5">
             <a href="/intake" class="px-2.5 py-1 bg-archive-bg border border-archive-border hover:border-blood-700 rounded text-parchment-200 hover:text-blood-500 transition-all flex items-center gap-1.5">
                 <span class="text-blood-600">✝</span> Diagnostic Protocol
             </a>

@@ -1,0 +1,29 @@
+<div id="mobile-nav-drawer" class="fixed inset-0 z-50 flex flex-col bg-archive-card/95 backdrop-blur-md border-b border-archive-border font-mono text-xs animate-fade-in p-6">
+    <div class="flex justify-between items-center border-b border-archive-border pb-4 mb-6">
+        <a href="/" class="flex items-center space-x-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-blood-600 shadow-[0_0_8px_#a30f2e]"></span>
+            <span class="font-bold text-parchment-100 tracking-wider uppercase font-gothic">RSFW Series</span>
+        </a>
+        <button onclick="document.getElementById('mobile-nav-drawer').remove()" class="text-archive-muted hover:text-blood-500 uppercase text-sm font-bold">
+            ✕ CLOSE
+        </button>
+    </div>
+
+    <div class="flex flex-col space-y-4">
+        <a href="/intake" onclick="document.getElementById('mobile-nav-drawer').remove()" class="px-4 py-3 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-blood-500 flex items-center gap-2">
+            <span class="text-blood-600">✝</span> Diagnostic Protocol
+        </a>
+        <a href="/dossiers" onclick="document.getElementById('mobile-nav-drawer').remove()" class="px-4 py-3 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-blood-500 flex items-center gap-2">
+            <span class="text-blood-600">☩</span> Personnel Files
+        </a>
+        <a href="/interactive" onclick="document.getElementById('mobile-nav-drawer').remove()" class="px-4 py-3 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-blood-500 flex items-center gap-2">
+            <span class="text-blood-600">▶</span> Script Engine
+        </a>
+        <a href="/vault" onclick="document.getElementById('mobile-nav-drawer').remove()" class="px-4 py-3 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-amber-400 flex items-center gap-2">
+            <span class="text-blood-600">📜</span> Book Vault
+        </a>
+        <a href="/media" onclick="document.getElementById('mobile-nav-drawer').remove()" class="px-4 py-3 bg-archive-bg border border-archive-border rounded text-parchment-200 hover:text-amber-400 flex items-center gap-2">
+            <span class="text-blood-600">🎬</span> Cinematics
+        </a>
+    </div>
+</div>
