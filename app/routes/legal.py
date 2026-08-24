@@ -57,6 +57,17 @@ async def render_contact_modal(request: Request):
         name="components/contact_modal.html"
     )
 
+@router.get("/inspiration", response_class=HTMLResponse)
+async def render_inspiration_page(request: Request):
+    """Renders the Spiritual Inspiration tribute page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/inspiration.html",
+        context={
+            "page_title": "Spiritual Inspiration | The Reform School for Witches",
+            "meta_description": "A tribute to Blessed Sister Maria Laura Mainetti and Sister Amalia—the true spiritual inspirations behind the world of RSFW."
+        }
+    )
 
 def send_brevo_payload(payload: dict, api_key: str, ssl_context: ssl.SSLContext) -> bool:
     """Helper function to execute HTTPS POST requests to Brevo API."""
