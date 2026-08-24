@@ -1,14 +1,37 @@
 services:
   - type: web
     name: reform-school-witches-portal
-    env: python
+    env: docker
     region: oregon
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
     envVars:
-      - key: ENVIRONMENT
+      - key: APP_ENV
         value: production
+      - key: DEBUG
+        value: "False"
+      - key: PROJECT_NAME
+        value: "The Reform School for Witches Series - Reader Portal"
+      - key: PORT
+        value: "8000"
+      - key: SITE_URL
+        value: https://www.rsfwseries.com
+      - key: COOKIE_SECURE
+        value: "True"
+      - key: COOKIE_HTTPONLY
+        value: "True"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: MANUSCRIPT_PATH
+        value: app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf
+      - key: BREVO_SENDER_EMAIL
+        value: hello@redcandledigital.io
+      - key: BREVO_SENDER_NAME
+        value: "Our Lady of Tears Academy"
+      - key: SECRET_KEY
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY
@@ -17,9 +40,3 @@ services:
         sync: false
       - key: BREVO_API_KEY
         sync: false
-      - key: BREVO_SENDER_EMAIL
-        value: hello@redcandledigital.io
-      - key: BREVO_SENDER_NAME
-        value: "Our Lady of Tears Academy"
-      - key: SECRET_KEY
-        generateValue: true
