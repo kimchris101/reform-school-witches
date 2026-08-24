@@ -25,7 +25,7 @@ services:
       - key: COOKIE_SAMESITE
         value: lax
       - key: MANUSCRIPT_PATH
-        value: app/static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf
+        value: static/downloads/RSFW_Book_1_The_Blood_Lily_Contract.pdf
       - key: BREVO_SENDER_EMAIL
         value: hello@redcandledigital.io
       - key: BREVO_SENDER_NAME
