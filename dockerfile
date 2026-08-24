@@ -22,5 +22,5 @@ COPY . .
 # Expose server port
 EXPOSE 8000
 
-# Run with Gunicorn using Uvicorn workers
-CMD ["gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+# Run with Gunicorn using Uvicorn workers, reading dynamic PORT variable with 8000 fallback
+CMD ["sh", "-c", "gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8000} --timeout 120"]
