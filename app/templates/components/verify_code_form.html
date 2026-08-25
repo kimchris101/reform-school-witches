@@ -1,10 +1,18 @@
 <div class="space-y-4 font-mono text-xs text-center animate-fade-in">
     <div class="space-y-1">
-        <p class="text-[10px] uppercase tracking-widest text-blood-900 font-bold">Passcode Transmitted</p>
-        <h3 class="text-lg font-gothic text-archive-bg font-bold uppercase">Check Your Inbox</h3>
-        <p class="text-xs text-archive-bg/80 font-serif leading-relaxed">
-            A 6-digit access code has been dispatched to <strong class="text-blood-900">{{ email }}</strong>.
-        </p>
+        {% if is_returning %}
+            <p class="text-[10px] uppercase tracking-widest text-amber-600 font-bold">Initiate Record Detected</p>
+            <h3 class="text-lg font-gothic text-archive-bg font-bold uppercase">Welcome Back, {{ alias }}</h3>
+            <p class="text-xs text-archive-bg/80 font-serif leading-relaxed">
+                A 6-digit re-authentication passcode has been sent to <strong class="text-blood-900">{{ email }}</strong> to restore your clearance.
+            </p>
+        {% else %}
+            <p class="text-[10px] uppercase tracking-widest text-blood-900 font-bold">Passcode Transmitted</p>
+            <h3 class="text-lg font-gothic text-archive-bg font-bold uppercase">Check Your Inbox</h3>
+            <p class="text-xs text-archive-bg/80 font-serif leading-relaxed">
+                A 6-digit access code has been dispatched to <strong class="text-blood-900">{{ email }}</strong>.
+            </p>
+        {% endif %}
     </div>
 
     <form hx-post="/vault/verify-code" 
@@ -16,7 +24,7 @@
         
         <div>
             <label class="block text-blood-900 font-bold uppercase mb-1 text-[10px] tracking-wider">
-                Enter 6-Digit Verification Code *
+                Enter 6-Digit Passcode *
             </label>
             <input type="text" 
                    name="code" 
@@ -28,7 +36,11 @@
 
         <button type="submit" 
                 class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic py-3 uppercase tracking-widest font-bold transition-colors shadow-md">
-            ✝ Verify Code & Unlock Access
+            {% if is_returning %}
+                ✝ Restore Clearance & Unlock
+            {% else %}
+                ✝ Verify Code & Unlock Access
+            {% endif %}
         </button>
     </form>
 </div>
