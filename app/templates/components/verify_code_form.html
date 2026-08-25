@@ -1,0 +1,34 @@
+<div class="space-y-4 font-mono text-xs text-center animate-fade-in">
+    <div class="space-y-1">
+        <p class="text-[10px] uppercase tracking-widest text-blood-900 font-bold">Passcode Transmitted</p>
+        <h3 class="text-lg font-gothic text-archive-bg font-bold uppercase">Check Your Inbox</h3>
+        <p class="text-xs text-archive-bg/80 font-serif leading-relaxed">
+            A 6-digit access code has been dispatched to <strong class="text-blood-900">{{ email }}</strong>.
+        </p>
+    </div>
+
+    <form hx-post="/vault/verify-code" 
+          hx-target="#registration-form-container" 
+          hx-swap="innerHTML" 
+          class="space-y-4">
+        
+        <input type="hidden" name="email" value="{{ email }}">
+        
+        <div>
+            <label class="block text-blood-900 font-bold uppercase mb-1 text-[10px] tracking-wider">
+                Enter 6-Digit Verification Code *
+            </label>
+            <input type="text" 
+                   name="code" 
+                   required 
+                   maxlength="6" 
+                   placeholder="123456" 
+                   class="w-full text-center text-lg tracking-[0.4em] font-bold bg-archive-bg text-amber-400 px-3 py-2 border-2 border-blood-900 focus:outline-none rounded-sm">
+        </div>
+
+        <button type="submit" 
+                class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic py-3 uppercase tracking-widest font-bold transition-colors shadow-md">
+            ✝ Verify Code & Unlock Access
+        </button>
+    </form>
+</div>
