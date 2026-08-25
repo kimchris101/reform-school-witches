@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from ..config import settings
 from ..services.script_engine import get_script_node, SCRIPT_NODES
 from ..services.lore_engine import search_manuscript_lore
+from app.utils.auth import is_authenticated_session
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
