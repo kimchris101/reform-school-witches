@@ -1,18 +1,18 @@
 import os
 import random
 import json
-import ssl
 import re
 import urllib.request
 from fastapi import APIRouter, Request, HTTPException, status, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
+
+from app.utils.auth import is_authenticated_session, get_ssl_context
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 # Temporary in-memory OTP store: { "email@domain.com": {"code": "123456", "alias": "Initiate"} }
-# In production staging, this can be backed by Redis or Supabase.
 VERIFICATION_CODES = {}
 
 BOOKS_DB = [
@@ -69,12 +69,6 @@ BOOKS_DB = [
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-def is_authenticated_session(request: Request) -> bool:
-    """Helper to verify if a valid member session token cookie exists."""
-    token = request.cookies.get("rsfw_member_token")
-    return bool(token and token.strip())
-
-
 def send_otp_via_brevo(recipient_email: str, otp_code: str) -> bool:
     """Dispatches a 6-digit verification code to the user's email address via Brevo API."""
     api_key = os.getenv("BREVO_API_KEY", "").strip()
@@ -107,23 +101,65 @@ def send_otp_via_brevo(recipient_email: str, otp_code: str) -> bool:
     }
 
     try:
-        import certifi
-        ssl_ctx = ssl.create_default_context(cafile=certifi.where())
-    except ImportError:
-        ssl_ctx = ssl._create_unverified_context()
-
-    try:
         req = urllib.request.Request(
             "https://api.brevo.com/v3/smtp/email",
             data=json.dumps(payload).encode("utf-8"),
             headers=headers,
             method="POST"
         )
-        with urllib.request.urlopen(req, context=ssl_ctx) as response:
+        with urllib.request.urlopen(req, context=get_ssl_context()) as response:
             return response.status in (200, 201)
     except Exception as e:
         print(f"[ BREVO OTP DISPATCH ERROR ] {e}")
         return False
+
+
+def sync_contact_to_brevo(email: str, alias: str) -> bool:
+    """Syncs a verified user's email and alias directly into Brevo Contacts."""
+    api_key = os.getenv("BREVO_API_KEY", "").strip()
+    list_id_env = os.getenv("BREVO_LIST_ID", "").strip()
+
+    if not api_key:
+        print(f"[ BREVO CONTACT SYNC SKIPPED (DEV) ] Email: {email} | Alias: {alias}")
+        return True
+
+    payload = {
+        "email": email,
+        "attributes": {
+            "FIRSTNAME": alias
+        },
+        "updateEnabled": True
+    }
+
+    if list_id_env.isdigit():
+        payload["listIds"] = [int(list_id_env)]
+
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+
+    try:
+        req = urllib.request.Request(
+            "https://api.brevo.com/v3/contacts",
+            data=json.dumps(payload).encode("utf-8"),
+            headers=headers,
+            method="POST"
+        )
+        with urllib.request.urlopen(req, context=get_ssl_context()) as response:
+            if response.status in (200, 201, 204):
+                print(f"[ BREVO CONTACT SYNC SUCCESS ] Synced {email} ({alias})")
+                return True
+    except urllib.error.HTTPError as e:
+        if e.code in (204, 400):
+            print(f"[ BREVO CONTACT SYNC NOTICE ] Contact already exists/updated: {email}")
+            return True
+        print(f"[ BREVO CONTACT SYNC HTTP ERROR ] {e.code}: {e.read().decode()}")
+    except Exception as e:
+        print(f"[ BREVO CONTACT SYNC ERROR ] {e}")
+
+    return False
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -223,11 +259,9 @@ async def request_verification_code(
             status_code=400
         )
 
-    # Generate 6-digit passcode
     otp_code = str(random.randint(100000, 999999))
     VERIFICATION_CODES[clean_email] = {"code": otp_code, "alias": alias}
 
-    # Send via Brevo
     sent = send_otp_via_brevo(clean_email, otp_code)
 
     if not sent:
@@ -241,7 +275,6 @@ async def request_verification_code(
             status_code=500
         )
 
-    # Render Step 2: Passcode Entry Form
     return templates.TemplateResponse(
         request=request,
         name="components/verify_code_form.html",
@@ -255,7 +288,7 @@ async def verify_code_and_grant_access(
     email: str = Form(...),
     code: str = Form(...)
 ):
-    """Validates submitted OTP code against store before granting member token cookie."""
+    """Validates submitted OTP code, syncs contact to Brevo, and grants session token."""
     clean_email = email.strip().lower()
     clean_code = code.strip()
 
@@ -272,17 +305,21 @@ async def verify_code_and_grant_access(
             status_code=400
         )
 
-    # Clean up used code
     alias = record.get("alias", "Initiate")
+    
+    # 1. Sync verified contact to Brevo Contacts Dashboard
+    sync_contact_to_brevo(clean_email, alias)
+
+    # 2. Clean up used code
     del VERIFICATION_CODES[clean_email]
 
+    # 3. Return clearance template & set 30-day session cookie
     response = templates.TemplateResponse(
         request=request,
         name="components/vault_access_granted.html",
         context={"user_alias": alias}
     )
     
-    # Set verified session cookie
     response.set_cookie(
         key="rsfw_member_token",
         value=f"initiate_{clean_email}",
