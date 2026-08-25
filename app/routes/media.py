@@ -75,22 +75,24 @@ async def render_cinematics_gallery(request: Request):
 
 @router.get("/cutscene/{scene_id}", response_class=HTMLResponse)
 async def get_cutscene_modal(request: Request, scene_id: str):
-    """Returns the video modal or renders an inline authentication modal for unauthenticated visitors."""
+    """Returns the video modal or blocks non-verified initiates with a modal warning."""
     if not is_authenticated_session(request):
         return HTMLResponse(
             content="""
             <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in font-mono">
                 <div class="bg-archive-card border border-blood-900/80 w-full max-w-md p-6 rounded shadow-[0_0_50px_rgba(163,15,46,0.3)] text-center space-y-4">
-                    <div class="text-blood-500 font-bold text-xs uppercase tracking-widest">✝ ACCESS RESTRICTED :: DIOCESAN CLEARANCE REQUIRED ✝</div>
-                    <h3 class="text-lg font-gothic text-parchment-100 uppercase font-bold">Classified Cinematic Feed</h3>
+                    <div class="text-blood-500 font-bold text-xs uppercase tracking-widest">✝ ACCESS RESTRICTED :: EMAIL VERIFICATION REQUIRED ✝</div>
+                    <h3 class="text-lg font-gothic text-parchment-100 uppercase font-bold">Classified Surveillance Feed</h3>
                     <p class="text-xs text-parchment-200 leading-relaxed font-serif">
-                        Streaming access to animated cutscene archives requires an authenticated initiate email session.
+                        Streaming access to animated cutscene archives requires a verified email session passcode.
                     </p>
                     <div class="pt-2 flex flex-col gap-2">
-                        <a href="/intake" class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 py-2.5 text-xs uppercase tracking-wider font-bold transition-colors border border-blood-700">
-                            PROCEED TO INTAKE DIAGNOSTIC
-                        </a>
-                        <button onclick="document.getElementById('modal-container').remove()" class="text-archive-muted hover:text-parchment-100 py-1 uppercase text-[10px]">
+                        <button onclick="document.getElementById('modal-container').remove(); document.getElementById('register-modal').classList.remove('hidden');" 
+                                class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 py-2.5 text-xs uppercase tracking-wider font-bold transition-colors border border-blood-700">
+                            Enter 6-Digit Passcode / Request Code
+                        </button>
+                        <button onclick="document.getElementById('modal-container').remove()" 
+                                class="text-archive-muted hover:text-parchment-100 py-1 uppercase text-[10px]">
                             DISMISS
                         </button>
                     </div>
