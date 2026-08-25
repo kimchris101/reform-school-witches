@@ -1,5 +1,6 @@
 import os
-from fastapi import APIRouter, Request, HTTPException, status
+import re
+from fastapi import APIRouter, Request, HTTPException, status, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 
@@ -57,9 +58,18 @@ BOOKS_DB = [
     }
 ]
 
+EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def is_authenticated_session(request: Request) -> bool:
+    """Helper to verify if a valid member session token cookie exists."""
+    token = request.cookies.get("rsfw_member_token")
+    return bool(token and token.strip())
+
+
 @router.get("/", response_class=HTMLResponse)
 async def render_vault_page(request: Request):
-    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+    is_authenticated = is_authenticated_session(request)
     
     # Safely read user cookies
     try:
@@ -109,14 +119,13 @@ async def render_vault_page(request: Request):
         }
     )
 
+
 @router.get("/download/{book_id}")
 async def download_book_pdf(request: Request, book_id: str):
-    is_authenticated = request.cookies.get("rsfw_member_token") is not None
-    
-    if not is_authenticated:
+    if not is_authenticated_session(request):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Diocesan Clearance Required. Please register for member access."
+            detail="Diocesan Clearance Required. Please authenticate your email via Intake Protocol."
         )
 
     book = next((b for b in BOOKS_DB if b["id"] == book_id), None)
@@ -142,16 +151,39 @@ async def download_book_pdf(request: Request, book_id: str):
         media_type="application/pdf"
     )
 
+
 @router.post("/register", response_class=HTMLResponse)
-async def register_member(request: Request):
-    form_data = await request.form()
-    email = form_data.get("email")
-    alias = form_data.get("alias")
+async def register_member(
+    request: Request,
+    email: str = Form(...),
+    alias: str = Form(default="Initiate")
+):
+    """Verifies initiate email format and provisions a member token cookie."""
+    clean_email = email.strip().lower()
+
+    if not EMAIL_REGEX.match(clean_email):
+        return HTMLResponse(
+            content="""
+            <div class="bg-black/90 border border-blood-700 p-4 rounded text-center font-mono space-y-2">
+                <span class="text-blood-500 font-bold text-xs">[ VERIFICATION FAILED ]</span>
+                <p class="text-xs text-parchment-200">A valid email address is required to generate Diocesan Clearance.</p>
+            </div>
+            """,
+            status_code=400
+        )
 
     response = templates.TemplateResponse(
         request=request,
         name="components/vault_access_granted.html",
-        context={"user_alias": alias}
+        context={"user_alias": alias or "Initiate"}
     )
-    response.set_cookie(key="rsfw_member_token", value=f"initiate_{email}", path="/", max_age=2592000)
+    # Set 30-day session cookie linking email access
+    response.set_cookie(
+        key="rsfw_member_token",
+        value=f"initiate_{clean_email}",
+        path="/",
+        max_age=2592000,
+        httponly=True,
+        samesite="lax"
+    )
     return response
