@@ -2,6 +2,8 @@ from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from app.utils.auth import is_authenticated_session
+
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
@@ -48,12 +50,6 @@ CUTSCENE_DB = {
         "description": "Inside Roman's nightmare. Taunted by Amira, Roman watches Kimbra & Damian from the balcony, He grips his champagne flute until the glass shatters."
     }
 }
-
-
-def is_authenticated_session(request: Request) -> bool:
-    """Helper to verify if a valid member session token cookie exists."""
-    token = request.cookies.get("rsfw_member_token")
-    return bool(token and token.strip())
 
 
 @router.get("/", response_class=HTMLResponse)
