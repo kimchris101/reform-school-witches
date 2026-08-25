@@ -1,15 +1,20 @@
 <div class="bg-black/90 border-2 border-blood-800 p-6 rounded text-center space-y-4 font-mono animate-fade-in">
     <div class="space-y-1">
-        <span class="text-amber-400 font-bold text-xs uppercase tracking-widest">✝ DIOCESAN CLEARANCE PROVISIONED ✝</span>
-        <h3 class="text-lg font-gothic text-parchment-100 font-bold uppercase">Welcome, {{ user_alias or 'Initiate' }}</h3>
+        {% if is_returning %}
+            <span class="text-amber-400 font-bold text-xs uppercase tracking-widest">✝ DIOCESAN CLEARANCE RESTORED ✝</span>
+            <h3 class="text-lg font-gothic text-parchment-100 font-bold uppercase">Welcome Back, {{ user_alias or 'Initiate' }}</h3>
+        {% else %}
+            <span class="text-amber-400 font-bold text-xs uppercase tracking-widest">✝ DIOCESAN CLEARANCE PROVISIONED ✝</span>
+            <h3 class="text-lg font-gothic text-parchment-100 font-bold uppercase">Welcome, {{ user_alias or 'Initiate' }}</h3>
+        {% endif %}
     </div>
 
     <p class="text-xs font-serif text-parchment-200 leading-relaxed">
-        Your email session has been authenticated and registered in the Archdiocese registry. Your 30-day clearance token is active.
+        Your email session has been verified and synced with the Archdiocese registry. Your 30-day clearance cookie is active on this browser.
     </p>
 
     <div class="bg-archive-bg border border-blood-900/60 p-3 rounded text-[11px] text-amber-400 font-mono space-y-1">
-        <p>✓ Free Book Vault PDF Downloads Unlocked</p>
+        <p>✓ Book Vault PDF Downloads Unlocked</p>
         <p>✓ Surveillance Vault Cinematic Cutscenes Unlocked</p>
     </div>
 
