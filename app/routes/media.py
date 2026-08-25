@@ -49,10 +49,17 @@ CUTSCENE_DB = {
     }
 }
 
+
+def is_authenticated_session(request: Request) -> bool:
+    """Helper to verify if a valid member session token cookie exists."""
+    token = request.cookies.get("rsfw_member_token")
+    return bool(token and token.strip())
+
+
 @router.get("/", response_class=HTMLResponse)
 async def render_cinematics_gallery(request: Request):
     """Renders the Cinematics Gallery with authentication awareness."""
-    is_authenticated = request.cookies.get("rsfw_member_token") is not None
+    is_authenticated = is_authenticated_session(request)
 
     return templates.TemplateResponse(
         request=request,
@@ -65,20 +72,37 @@ async def render_cinematics_gallery(request: Request):
         }
     )
 
+
 @router.get("/cutscene/{scene_id}", response_class=HTMLResponse)
 async def get_cutscene_modal(request: Request, scene_id: str):
-    """Returns the video modal or blocks non-subscribers."""
-    is_authenticated = request.cookies.get("rsfw_member_token") is not None
-    
-    if not is_authenticated:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Diocesan Clearance Required. Subscriber access required to view archives."
+    """Returns the video modal or renders an inline authentication modal for unauthenticated visitors."""
+    if not is_authenticated_session(request):
+        return HTMLResponse(
+            content="""
+            <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in font-mono">
+                <div class="bg-archive-card border border-blood-900/80 w-full max-w-md p-6 rounded shadow-[0_0_50px_rgba(163,15,46,0.3)] text-center space-y-4">
+                    <div class="text-blood-500 font-bold text-xs uppercase tracking-widest">✝ ACCESS RESTRICTED :: DIOCESAN CLEARANCE REQUIRED ✝</div>
+                    <h3 class="text-lg font-gothic text-parchment-100 uppercase font-bold">Classified Cinematic Feed</h3>
+                    <p class="text-xs text-parchment-200 leading-relaxed font-serif">
+                        Streaming access to animated cutscene archives requires an authenticated initiate email session.
+                    </p>
+                    <div class="pt-2 flex flex-col gap-2">
+                        <a href="/intake" class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 py-2.5 text-xs uppercase tracking-wider font-bold transition-colors border border-blood-700">
+                            PROCEED TO INTAKE DIAGNOSTIC
+                        </a>
+                        <button onclick="document.getElementById('modal-container').remove()" class="text-archive-muted hover:text-parchment-100 py-1 uppercase text-[10px]">
+                            DISMISS
+                        </button>
+                    </div>
+                </div>
+            </div>
+            """,
+            status_code=200
         )
 
     scene = CUTSCENE_DB.get(scene_id)
     if not scene:
-        raise HTTPException(status_code=404, detail="Cinematic record missing.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cinematic record missing.")
 
     return templates.TemplateResponse(
         request=request,
