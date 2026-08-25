@@ -16,15 +16,15 @@
             <div class="bg-archive-card border border-blood-700/80 p-4 rounded-sm flex justify-between items-center font-mono text-xs">
                 <span class="text-amber-400 font-bold flex items-center gap-2">
                     <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    SUBSCRIBER CLEARANCE ACTIVE: Video Feeds Unlocked
+                    VERIFIED CLEARANCE ACTIVE: Video Feeds Unlocked
                 </span>
                 <span class="text-archive-muted">Level 5 Access Granted</span>
             </div>
         {% else %}
             <div class="bg-blood-950/60 border border-blood-800 p-6 rounded-sm flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-xs">
                 <div>
-                    <span class="text-blood-500 font-bold uppercase block tracking-wider mb-1">🔒 SUBSCRIBER ACCESS ONLY</span>
-                    <p class="text-parchment-300 font-serif text-sm">Authenticate your email session or register as an Academy initiate to unlock full streaming access to all animated cutscenes.</p>
+                    <span class="text-blood-500 font-bold uppercase block tracking-wider mb-1">🔒 VERIFIED EMAIL ACCESS ONLY</span>
+                    <p class="text-parchment-300 font-serif text-sm">Verify your email address via passcode to unlock full streaming access to all animated cutscenes.</p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
                     <a href="/intake" 
@@ -33,7 +33,7 @@
                     </a>
                     <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
                             class="bg-archive-bg hover:bg-archive-card text-amber-400 font-gothic px-5 py-3 uppercase tracking-widest text-xs rounded-sm border border-archive-border transition-all font-bold text-center">
-                        Manual Registration
+                        Manual Verification
                     </button>
                 </div>
             </div>
@@ -97,7 +97,7 @@
                         <!-- Locked Overlay for Non-Subscribers -->
                         <div class="absolute inset-0 bg-archive-bg/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4 text-center">
                             <span class="text-2xl mb-1">🔒</span>
-                            <span class="text-[10px] font-mono text-blood-500 uppercase tracking-widest font-bold">Subscriber Sealed</span>
+                            <span class="text-[10px] font-mono text-blood-500 uppercase tracking-widest font-bold">Verification Sealed</span>
                         </div>
                     {% endif %}
 
@@ -130,7 +130,7 @@
                     </a>
                     <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
                             class="w-full text-[10px] text-archive-muted hover:text-amber-400 uppercase tracking-widest text-center py-1">
-                        Or Enter Member Email Code
+                        Or Enter 6-Digit Passcode
                     </button>
                 </div>
             {% endif %}
@@ -139,19 +139,22 @@
     </div>
 </div>
 
-<!-- Member Registration Modal -->
+<!-- Member Verification Modal -->
 <div id="register-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-archive-bg/85 backdrop-blur-md">
     <div class="bg-parchment-200 text-archive-bg border-4 border-blood-900 max-w-md w-full p-6 md:p-8 rounded-sm shadow-2xl relative font-serif">
         <button onclick="document.getElementById('register-modal').classList.add('hidden')" class="absolute top-4 right-4 text-archive-bg font-mono font-bold text-xl">✕</button>
 
         <div id="registration-form-container">
             <p class="text-xs font-mono uppercase tracking-widest text-blood-900 font-bold mb-1">Diocesan Access Portal</p>
-            <h2 class="text-2xl font-gothic text-archive-bg font-bold uppercase tracking-wider mb-2">Subscriber Registration</h2>
+            <h2 class="text-2xl font-gothic text-archive-bg font-bold uppercase tracking-wider mb-2">Subscriber Verification</h2>
             <p class="text-xs text-archive-bg/80 font-serif mb-6 leading-relaxed">
-                Register as an official reader to gain immediate streaming access to all animated cutscenes and free PDF downloads in the vault.
+                Enter your email address to receive a 6-digit access code. Verified initiates receive immediate streaming access to all animated cutscenes and free PDF downloads in the vault.
             </p>
 
-            <form hx-post="/vault/register" hx-target="#registration-form-container" hx-swap="innerHTML" class="space-y-4 font-mono text-xs">
+            <form hx-post="/vault/request-verification" 
+                  hx-target="#registration-form-container" 
+                  hx-swap="innerHTML" 
+                  class="space-y-4 font-mono text-xs">
                 <div>
                     <label class="block text-blood-900 font-bold uppercase mb-1">Code Name / Alias *</label>
                     <input type="text" name="alias" required placeholder="Initiate Claire" class="w-full bg-archive-bg text-parchment-100 px-3 py-2 border border-blood-900 focus:outline-none">
@@ -161,7 +164,7 @@
                     <input type="email" name="email" required placeholder="initiate@diocesan.org" class="w-full bg-archive-bg text-parchment-100 px-3 py-2 border border-blood-900 focus:outline-none">
                 </div>
                 <button type="submit" class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic py-3 uppercase tracking-widest font-bold mt-2 transition-colors">
-                    ✝ Unlock Subscriber Access
+                    ✝ Send 6-Digit Passcode
                 </button>
             </form>
         </div>
