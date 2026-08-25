@@ -24,12 +24,18 @@
             <div class="bg-blood-950/60 border border-blood-800 p-6 rounded-sm flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-xs">
                 <div>
                     <span class="text-blood-500 font-bold uppercase block tracking-wider mb-1">🔒 SUBSCRIBER ACCESS ONLY</span>
-                    <p class="text-parchment-300 font-serif text-sm">Register as an Academy initiate to unlock full streaming access to all animated cutscenes.</p>
+                    <p class="text-parchment-300 font-serif text-sm">Authenticate your email session or register as an Academy initiate to unlock full streaming access to all animated cutscenes.</p>
                 </div>
-                <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
-                        class="bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic px-6 py-3 uppercase tracking-widest text-xs rounded-sm shadow-md border border-blood-600 transition-all font-bold shrink-0">
-                    ✝ Join to Unlock
-                </button>
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
+                    <a href="/intake" 
+                       class="bg-blood-800 hover:bg-blood-700 text-parchment-100 font-gothic px-5 py-3 uppercase tracking-widest text-xs rounded-sm shadow-md border border-blood-600 transition-all font-bold text-center">
+                        ✝ Verify via Diagnostic
+                    </a>
+                    <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
+                            class="bg-archive-bg hover:bg-archive-card text-amber-400 font-gothic px-5 py-3 uppercase tracking-widest text-xs rounded-sm border border-archive-border transition-all font-bold text-center">
+                        Manual Registration
+                    </button>
+                </div>
             </div>
         {% endif %}
     </div>
@@ -117,10 +123,16 @@
                     <span>▶</span> Stream Cinematic Cutscene
                 </button>
             {% else %}
-                <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
-                        class="mt-6 w-full bg-archive-bg hover:bg-blood-950/80 border border-archive-border hover:border-blood-700 text-parchment-200 font-gothic py-3 px-4 rounded-sm transition-all flex justify-center items-center gap-2 font-bold uppercase tracking-wider text-xs">
-                    <span>🔒</span> Register to Stream Video
-                </button>
+                <div class="mt-6 flex flex-col gap-2 font-mono">
+                    <a href="/intake" 
+                       class="w-full bg-blood-900 hover:bg-blood-800 text-parchment-100 font-gothic py-2.5 px-4 rounded-sm transition-all flex justify-center items-center gap-2 font-bold uppercase tracking-wider text-xs text-center border border-blood-700">
+                        <span>🔒</span> Verify Email to Stream
+                    </a>
+                    <button onclick="document.getElementById('register-modal').classList.remove('hidden')" 
+                            class="w-full text-[10px] text-archive-muted hover:text-amber-400 uppercase tracking-widest text-center py-1">
+                        Or Enter Member Email Code
+                    </button>
+                </div>
             {% endif %}
         </div>
         {% endfor %}
