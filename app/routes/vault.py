@@ -3,6 +3,8 @@ import random
 import json
 import re
 import urllib.request
+import urllib.parse
+import urllib.error
 from fastapi import APIRouter, Request, HTTPException, status, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -12,7 +14,7 @@ from app.utils.auth import is_authenticated_session, get_ssl_context
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# Temporary in-memory OTP store: { "email@domain.com": {"code": "123456", "alias": "Initiate"} }
+# Temporary in-memory OTP store: { "email@domain.com": {"code": "123456", "alias": "Initiate", "is_returning": False} }
 VERIFICATION_CODES = {}
 
 BOOKS_DB = [
@@ -69,27 +71,64 @@ BOOKS_DB = [
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-def send_otp_via_brevo(recipient_email: str, otp_code: str) -> bool:
-    """Dispatches a 6-digit verification code to the user's email address via Brevo API."""
+def is_contact_registered_in_brevo(email: str) -> tuple[bool, str]:
+    """
+    Checks Brevo to verify if an email address is an existing registered member.
+    Returns (True, firstName) if registered, or (False, "Initiate") if new.
+    """
+    api_key = os.getenv("BREVO_API_KEY", "").strip()
+    if not api_key:
+        return False, "Initiate"
+
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key
+    }
+
+    try:
+        url = f"https://api.brevo.com/v3/contacts/{urllib.parse.quote(email)}"
+        req = urllib.request.Request(url, headers=headers, method="GET")
+        with urllib.request.urlopen(req, context=get_ssl_context()) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+                attributes = data.get("attributes", {})
+                first_name = attributes.get("FIRSTNAME", "Initiate")
+                return True, first_name
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return False, "Initiate"
+        print(f"[ BREVO CONTACT CHECK HTTP ERROR ] {e.code}")
+    except Exception as e:
+        print(f"[ BREVO CONTACT CHECK ERROR ] {e}")
+
+    return False, "Initiate"
+
+
+def send_otp_via_brevo(recipient_email: str, otp_code: str, is_returning: bool = False) -> bool:
+    """Dispatches a 6-digit verification code via Brevo with contextual subject lines."""
     api_key = os.getenv("BREVO_API_KEY", "").strip()
     sender_email = os.getenv("BREVO_SENDER_EMAIL", "hello@redcandledigital.io").strip()
 
     if not api_key:
-        print(f"[ LOCAL DEV OTP ] Code for {recipient_email}: {otp_code}")
+        print(f"[ LOCAL DEV OTP ] Code for {recipient_email}: {otp_code} (Returning: {is_returning})")
         return True
+
+    subject_title = "✝ Re-Authentication Passcode" if is_returning else "✝ Your Access Passcode"
+    header_title = "Diocesan Clearance Restoration" if is_returning else "Diocesan Clearance Verification"
+    body_text = "Enter the following 6-digit passcode to restore your active clearance and re-authenticate your browser session:" if is_returning else "Enter the following 6-digit passcode to verify your email and unlock vault access:"
 
     payload = {
         "sender": {"name": "Our Lady of Tears Academy", "email": sender_email},
         "to": [{"email": recipient_email}],
-        "subject": f"✝ Your Access Passcode: {otp_code}",
+        "subject": f"{subject_title}: {otp_code}",
         "htmlContent": f"""
             <div style="font-family: Georgia, serif; background-color: #070a0f; color: #f4f0e6; padding: 24px; border: 1px solid #38050e; text-align: center;">
-                <h2 style="color: #c7153a; margin-top: 0;">Diocesan Clearance Verification</h2>
-                <p style="font-size: 14px;">Enter the following 6-digit passcode to verify your email and unlock vault access:</p>
+                <h2 style="color: #c7153a; margin-top: 0;">{header_title}</h2>
+                <p style="font-size: 14px;">{body_text}</p>
                 <div style="background-color: #0f141d; border: 1px solid #c7153a; color: #f59e0b; font-size: 28px; font-family: monospace; font-weight: bold; letter-spacing: 6px; padding: 16px; margin: 20px 0; display: inline-block;">
                     {otp_code}
                 </div>
-                <p style="font-size: 11px; color: #717c8d;">This code will expire shortly. If you did not request access, ignore this message.</p>
+                <p style="font-size: 11px; color: #717c8d;">This single-use passcode expires shortly. If you did not request clearance restoration, ignore this message.</p>
             </div>
         """
     }
@@ -153,7 +192,7 @@ def sync_contact_to_brevo(email: str, alias: str) -> bool:
                 return True
     except urllib.error.HTTPError as e:
         if e.code in (204, 400):
-            print(f"[ BREVO CONTACT SYNC NOTICE ] Contact already exists/updated: {email}")
+            print(f"[ BREVO CONTACT SYNC NOTICE ] Contact updated: {email}")
             return True
         print(f"[ BREVO CONTACT SYNC HTTP ERROR ] {e.code}: {e.read().decode()}")
     except Exception as e:
@@ -245,7 +284,10 @@ async def request_verification_code(
     email: str = Form(...),
     alias: str = Form(default="Initiate")
 ):
-    """Generates a 6-digit OTP code, emails it via Brevo, and prompts user for entry."""
+    """
+    Detects if email belongs to an existing member. Generates a 6-digit OTP code,
+    dispatches it via Brevo, and renders Step 2 with tailored messaging.
+    """
     clean_email = email.strip().lower()
 
     if not EMAIL_REGEX.match(clean_email):
@@ -259,10 +301,18 @@ async def request_verification_code(
             status_code=400
         )
 
-    otp_code = str(random.randint(100000, 999999))
-    VERIFICATION_CODES[clean_email] = {"code": otp_code, "alias": alias}
+    # Check Brevo to see if contact exists
+    is_registered, stored_alias = is_contact_registered_in_brevo(clean_email)
+    final_alias = stored_alias if is_registered else (alias or "Initiate")
 
-    sent = send_otp_via_brevo(clean_email, otp_code)
+    otp_code = str(random.randint(100000, 999999))
+    VERIFICATION_CODES[clean_email] = {
+        "code": otp_code,
+        "alias": final_alias,
+        "is_returning": is_registered
+    }
+
+    sent = send_otp_via_brevo(clean_email, otp_code, is_returning=is_registered)
 
     if not sent:
         return HTMLResponse(
@@ -278,7 +328,11 @@ async def request_verification_code(
     return templates.TemplateResponse(
         request=request,
         name="components/verify_code_form.html",
-        context={"email": clean_email, "alias": alias}
+        context={
+            "email": clean_email,
+            "alias": final_alias,
+            "is_returning": is_registered
+        }
     )
 
 
@@ -288,7 +342,7 @@ async def verify_code_and_grant_access(
     email: str = Form(...),
     code: str = Form(...)
 ):
-    """Validates submitted OTP code, syncs contact to Brevo, and grants session token."""
+    """Validates submitted OTP code, syncs contact to Brevo, and restores session token."""
     clean_email = email.strip().lower()
     clean_code = code.strip()
 
@@ -306,18 +360,22 @@ async def verify_code_and_grant_access(
         )
 
     alias = record.get("alias", "Initiate")
+    is_returning = record.get("is_returning", False)
     
-    # 1. Sync verified contact to Brevo Contacts Dashboard
+    # 1. Ensure contact record is saved/updated in Brevo
     sync_contact_to_brevo(clean_email, alias)
 
-    # 2. Clean up used code
+    # 2. Clean up used passcode
     del VERIFICATION_CODES[clean_email]
 
-    # 3. Return clearance template & set 30-day session cookie
+    # 3. Return clearance confirmation template & issue 30-day session cookie
     response = templates.TemplateResponse(
         request=request,
         name="components/vault_access_granted.html",
-        context={"user_alias": alias}
+        context={
+            "user_alias": alias,
+            "is_returning": is_returning
+        }
     )
     
     response.set_cookie(
